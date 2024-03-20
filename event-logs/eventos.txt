@@ -1,0 +1,5 @@
+13/03/2024 - 16:21	desassociar passkey
+13/03/2024 - 16:24	associar passkey
+13/03/2024 - 16:25	autenticação com passkey
+
+NOTA: existe mais logs de passkey anteriores
