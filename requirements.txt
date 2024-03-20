@@ -1,0 +1,3 @@
+regipy
+lxml
+python-evtx
