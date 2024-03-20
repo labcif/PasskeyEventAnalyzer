@@ -25,11 +25,11 @@ def read_evtx_file(evtx_file_path):
                     print("Use Type: AUTHENTICATION")
                 else:
                     print("Use Type: REGISTRATION")
-                print(f"Record Id: {root.find(event_path + "EventRecordID").text}")
+                print(f"Record Id: {root.find(event_path + 'EventRecordID').text}")
                 print(f"Event Id: {event_id.text}")
                 print(f"Timestamp: {record.timestamp()}")
-                print(f"Computer Name: {root.find(event_path+ "Computer").text}")
-                print(f"Registry: {root.find(event_path+ "Security").attrib.values()[0]}")
+                print(f"Computer Name: {root.find(event_path+ 'Computer').text}")
+                print(f"Registry: {root.find(event_path+ 'Security').attrib.values()[0]}")
                 print(f"Website: {eventData[1].text}")
                 print("========================================================")
 
@@ -38,7 +38,7 @@ def read_evtx_file(evtx_file_path):
 
 if __name__ == "__main__":
     # Replace 'path_to_evtx_file.evtx' with the actual path to your EVTX file
-    evtx_file_path = r'C:\Users\brume\Desktop\Projeto\PassKeys\event-logs\depois\Microsoft-Windows-WebAuthN%4Operational_depois.evtx'
+    evtx_file_path = r'event-logs\depois\Microsoft-Windows-WebAuthN%4Operational_depois.evtx'
     if len(sys.argv) == 2:
         read_evtx_file(sys.argv[1])
     else:
