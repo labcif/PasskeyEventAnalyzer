@@ -47,43 +47,34 @@ def read_evtx_file(evtx_file_path):
             #####################################
             # 1000: Start Registration          #
             # 1001: Registration Success        #
-            # 1002: Cancelled by user           #
+            # 1002: Failed/Canceled             #
             # 1003: Start Authentication        #
             # 1004: Authentication Success      #
-            # 1005: Cancelled by user           #
+            # 1005: Failed/Canceled             #
             # 1006: Start sending Ctap Cmd      #
             # 1007: Success Ctap Cmd            #
-            # 1008: Connection lost             #
+            # 1008: Connection failed           #
             #####################################
 
-
-            if event_id == "1000" or event_id == "1003":
+            if event_id in ["1000", "1003"]:
                 event = PasskeyLog()
                 event.set_TransactionId(root.getchildren()[1].getchildren()[0].text)
+                event.set_TimeStamp(record.timestamp())
+                event.set_ComputerName(root.find(event_path + 'Computer').text)
+                event.set_UserId(root.find(event_path + 'Security').attrib.values()[0])
+                event.set_EventType("Authentication" if event_id == "1003" else "Registration")
                 reading = True
-
-            if event_id == "1001" or event_id == "1004":
+            elif event_id in ["1001", "1004"]:
                 reading = False
                 event.set_EventConclusion("Success")
                 event_list.append(event)
-
-            if event_id == "1002" or event_id == "1005":
+            elif event_id in ["1002", "1005"]:
                 reading = False
                 event.set_Device("N/A")
                 event.set_EventConclusion("Incomplete")
                 event_list.append(event)
 
-
-            if reading == True:
-                if event_id == "1003":
-                    event.set_EventType("Authentication")
-                elif event_id == "1000":
-                    event.set_EventType("Registration")
-
-                event.set_TimeStamp(record.timestamp())
-                event.set_ComputerName(root.find(event_path + 'Computer').text)
-                event.set_UserId(root.find(event_path + 'Security').attrib.values()[0])
-
+            if reading == True and event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
                 type = None
                 for data in root.getchildren()[1].getchildren():
                     if "DevicePath" in data.values():
@@ -119,7 +110,7 @@ def read_evtx_file(evtx_file_path):
             print("-----------------------------------------------")
         print("Total Events:", len(event_list))
         print("-----------------------------------------------")
-         #####################################
+        ######################################
 
 
 
