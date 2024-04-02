@@ -27,8 +27,8 @@ if __name__ == "__main__":
         type=str)
 
     parser.add_argument(
-        "-r",
-        "--registry",
+        "-rf",
+        "--registryfile",
         help="Path with registry file",
         required=False,
         default=None,

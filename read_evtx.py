@@ -54,12 +54,21 @@ def read_evtx_file(evtx_file_path):
     reading = False
     event_list = []
 
+    # i = 0
     with Evtx(evtx_file_path) as evtx:
         for record in evtx.records():
+            # print(f"Reading record {i}")
+            # i = i + 1
 
-            root = etree.fromstring(record.xml())
+
+            # root = etree.fromstring(record.xml())
             soup = BeautifulSoup(record.xml(), 'xml')
-            event_id = root.find(event_path + "EventID").text
+
+            event_id = soup.find("EventID")
+            if event_id:
+                event_id = event_id.text
+
+            #event_id = root.find(event_path + "EventID").text
 
             #####################################
             # 1000: Start Registration          #
@@ -110,26 +119,67 @@ def read_evtx_file(evtx_file_path):
                 event_list.append(event)
 
             if reading and event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
+
                 type = None
 
+                """
                 event_data = soup.find("EventData")
-                if not event_data:
-                    return
+                if event_data:
+                    print(event_data)
+                    for data in event_data.find_all("Data"):
+                        type = None
+                        print("in for =====================")
+                        #print(data["Name"])
 
-                device_path = event_data.find("Data", attrs={'Name': 'DevicePath'})
-                if device_path:
-                    event.set_Device(device_path.text)
-                    if event.device is None:
-                        event.device = event.computerName
+                        if "DevicePath" in data["Name"]:
+                            event.set_Device(data.text)
+                            if (event.device is None):
+                                event.device = event.computerName
+                                print("\tprimeiro if")
+                            break
+                        if "RpId" in data["Name"]:
+                            event.set_Website(data.text)
+                            print("\tsegundo if")
+                            break
+                        if "ImageName" == data["Name"]:
+                            type = data["Name"]
+                            print("\tterceiro if")
+                            continue
+                        if (type == "ImageName" and "Value" in data["Name"]):
+                            event.set_BrowserPath(data["Name"])
+                            event.set_Browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
+                            print("\tquarto if")
+                            break
+                
+                """
 
-                rp_id = event_data.find("Data", attrs={'Name': 'RpId'})
-                if rp_id:
-                    event.set_Website(rp_id.text)
+                event_data = soup.find("EventData")
+                if event_data:
 
-                # TODO
+
+
+
+                    device_path = event_data.find("Data", attrs={'Name': 'DevicePath'})
+
+                    if device_path:
+                        event.set_Device(device_path.text)
+                        if event.device is None:
+                            event.device = event.computerName
+
+                    rp_id = event_data.find("Data", attrs={'Name': 'RpId'})
+                    if rp_id:
+                        event.set_Website(rp_id.text)
+
+
+                    image_name = event_data.find("Data", attrs={'Name': 'Name'})
+                    if image_name:
+                        if image_name.text == "ImageName":
+                            data_value = event_data.find("Data", attrs={'Name': 'Value'})
+                            if image_name.text == "ImageName" and data_value:
+                                event.set_BrowserPath(data_value.text)
+                                event.set_Browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
 
                 """
-                
                 for data in root.getchildren()[1].getchildren():
                     if "DevicePath" in data.values():
                         event.set_Device(data.text)
@@ -145,9 +195,11 @@ def read_evtx_file(evtx_file_path):
                     elif (type == "ImageName" and "Value" in data.values()):
                         event.set_BrowserPath(data.text)
                         event.set_Browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
-                        break
+                        break  
+
+"""
                 
-                """
+
 
         # Print for presentation purposes
         #####################################
