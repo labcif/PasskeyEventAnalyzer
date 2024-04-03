@@ -20,34 +20,34 @@ class PasskeyLog:
         self.browser = None
         self.browserPath = None
 
-    def setEventType(self, value):
+    def set_event_type(self, value):
         self.type = value
 
-    def set_TimeStamp(self, value):
+    def set_timestamp(self, value):
         self.timestamp = value
 
-    def set_TransactionId(self, value):
+    def set_transaction_id(self, value):
         self.transactionId = value
 
-    def set_EventConclusion(self, value):
+    def set_event_conclusion(self, value):
         self.result = value
 
-    def set_UserId(self, value):
+    def set_user_id(self, value):
         self.userId = value
 
-    def set_ComputerName(self, value):
+    def set_computer_name(self, value):
         self.computerName = value
 
-    def set_Device(self, value):
+    def set_device(self, value):
         self.device = value
 
-    def set_Website(self, value):
+    def set_website(self, value):
         self.website = value
 
-    def set_Browser(self, value):
+    def set_browser(self, value):
         self.browser = value
 
-    def set_BrowserPath(self, value):
+    def set_browser_path(self, value):
         self.browserPath = value
 
 
@@ -91,33 +91,33 @@ def read_evtx_file(evtx_file_path):
 
                 transaction_id = soup.find("Data", attrs={'Name': 'TransactionId'})
                 if transaction_id:
-                    event.set_TransactionId(transaction_id.text)
-                    # event.set_TransactionId(root.getchildren()[1].getchildren()[0].text)
+                    event.set_transaction_id(transaction_id.text)
+                    # event.set_transaction_id(root.getchildren()[1].getchildren()[0].text)
 
-                event.set_TimeStamp(record.timestamp())
+                event.set_timestamp(record.timestamp())
 
                 computer_name = soup.find("System")
                 computer_name = computer_name.find("Computer")
                 if computer_name:
-                    event.set_ComputerName(computer_name.text)
-                # event.set_ComputerName(root.find(event_path + 'Computer').text)
+                    event.set_computer_name(computer_name.text)
+                # event.set_computer_name(root.find(event_path + 'Computer').text)
 
                 user_id = soup.find("Security")
                 user_id = user_id.get('UserID')
                 if user_id:
-                    event.set_UserId(user_id)
-                # event.set_UserId(root.find(event_path + 'Security').attrib.values()[0])
+                    event.set_user_id(user_id)
+                # event.set_user_id(root.find(event_path + 'Security').attrib.values()[0])
 
-                event.set_EventType("Authentication" if event_id == "1003" else "Registration")
+                event.set_event_type("Authentication" if event_id == "1003" else "Registration")
                 reading = True
             elif event_id in ["1001", "1004"]:
                 reading = False
-                event.set_EventConclusion("Success")
+                event.set_event_conclusion("Success")
                 event_list.append(event)
             elif event_id in ["1002", "1005"]:
                 reading = False
-                event.set_Device("N/A")
-                event.set_EventConclusion("Incomplete")
+                event.set_device("N/A")
+                event.set_event_conclusion("Incomplete")
                 event_list.append(event)
 
             if reading and event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
@@ -131,37 +131,37 @@ def read_evtx_file(evtx_file_path):
                     image_name = event_data.find("Data", attrs={'Name': 'Name'})
 
                     if device_path:
-                        event.set_Device(device_path.text)
+                        event.set_device(device_path.text)
                         if device_path.text == "":
                             event.device = event.computerName
 
                     elif rp_id:
-                        event.set_Website(rp_id.text)
+                        event.set_website(rp_id.text)
 
                     elif image_name:
                         if image_name.text == "ImageName":
                             data_value = event_data.find("Data", attrs={'Name': 'Value'})
                             if data_value:
-                                event.set_BrowserPath(data_value.text)
-                                event.set_Browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
+                                event.set_browser_path(data_value.text)
+                                event.set_browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
 
                 """
                 type = None
                 for data in root.getchildren()[1].getchildren():
                     if "DevicePath" in data.values():
-                        event.set_Device(data.text)
+                        event.set_device(data.text)
                         if (event.device is None):
                             event.device = event.computerName
                         break
                     elif "RpId" in data.values():
-                        event.set_Website(data.text)
+                        event.set_website(data.text)
                         break
                     elif "ImageName" == data.text:
                         type = data.text
                         continue
                     elif (type == "ImageName" and "Value" in data.values()):
-                        event.set_BrowserPath(data.text)
-                        event.set_Browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
+                        event.set_browser_path(data.text)
+                        event.set_browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
                         break  
                 """
 
