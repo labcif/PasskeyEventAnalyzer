@@ -9,9 +9,18 @@ from datetime import datetime
 
 class PasskeyLog:
     def __init__(self):
-        pass
+        self.userId = None
+        self.transactionId = None
+        self.type = None
+        self.result = None
+        self.timestamp = None
+        self.computerName = None
+        self.device = None
+        self.website = None
+        self.browser = None
+        self.browserPath = None
 
-    def set_EventType(self, value):
+    def setEventType(self, value):
         self.type = value
 
     def set_TimeStamp(self, value):
@@ -48,18 +57,13 @@ def object_to_row(event):
 
 
 def read_evtx_file(evtx_file_path):
-    print(
-        "-------------------------------------------------------- Reading File ------------------------------------------------------------------")
-    event_path = ".//{http://schemas.microsoft.com/win/2004/08/events/event}"
+    print("------------------------------------ Reading File ------------------------------------")
+    # event_path = ".//{http://schemas.microsoft.com/win/2004/08/events/event}"
     reading = False
     event_list = []
 
-    # i = 0
     with Evtx(evtx_file_path) as evtx:
         for record in evtx.records():
-            # print(f"Reading record {i}")
-            # i = i + 1
-
 
             # root = etree.fromstring(record.xml())
             soup = BeautifulSoup(record.xml(), 'xml')
@@ -68,7 +72,7 @@ def read_evtx_file(evtx_file_path):
             if event_id:
                 event_id = event_id.text
 
-            #event_id = root.find(event_path + "EventID").text
+            # event_id = root.find(event_path + "EventID").text
 
             #####################################
             # 1000: Start Registration          #
@@ -93,18 +97,16 @@ def read_evtx_file(evtx_file_path):
                 event.set_TimeStamp(record.timestamp())
 
                 computer_name = soup.find("System")
+                computer_name = computer_name.find("Computer")
                 if computer_name:
-                    computer_name = computer_name.find("Computer")
-                    if computer_name:
-                        event.set_ComputerName(computer_name.text)
-                        # event.set_ComputerName(root.find(event_path + 'Computer').text)
+                    event.set_ComputerName(computer_name.text)
+                # event.set_ComputerName(root.find(event_path + 'Computer').text)
 
                 user_id = soup.find("Security")
+                user_id = user_id.get('UserID')
                 if user_id:
-                    user_id = user_id.get('UserID')
-                    if user_id:
-                        event.set_UserId(user_id)
-                        # event.set_UserId(root.find(event_path + 'Security').attrib.values()[0])
+                    event.set_UserId(user_id)
+                # event.set_UserId(root.find(event_path + 'Security').attrib.values()[0])
 
                 event.set_EventType("Authentication" if event_id == "1003" else "Registration")
                 reading = True
@@ -120,66 +122,31 @@ def read_evtx_file(evtx_file_path):
 
             if reading and event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
 
-                type = None
-
-                """
                 event_data = soup.find("EventData")
+
                 if event_data:
-                    print(event_data)
-                    for data in event_data.find_all("Data"):
-                        type = None
-                        print("in for =====================")
-                        #print(data["Name"])
-
-                        if "DevicePath" in data["Name"]:
-                            event.set_Device(data.text)
-                            if (event.device is None):
-                                event.device = event.computerName
-                                print("\tprimeiro if")
-                            break
-                        if "RpId" in data["Name"]:
-                            event.set_Website(data.text)
-                            print("\tsegundo if")
-                            break
-                        if "ImageName" == data["Name"]:
-                            type = data["Name"]
-                            print("\tterceiro if")
-                            continue
-                        if (type == "ImageName" and "Value" in data["Name"]):
-                            event.set_BrowserPath(data["Name"])
-                            event.set_Browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
-                            print("\tquarto if")
-                            break
-                
-                """
-
-                event_data = soup.find("EventData")
-                if event_data:
-
-
-
 
                     device_path = event_data.find("Data", attrs={'Name': 'DevicePath'})
+                    rp_id = event_data.find("Data", attrs={'Name': 'RpId'})
+                    image_name = event_data.find("Data", attrs={'Name': 'Name'})
 
                     if device_path:
                         event.set_Device(device_path.text)
-                        if event.device is None:
+                        if device_path.text == "":
                             event.device = event.computerName
 
-                    rp_id = event_data.find("Data", attrs={'Name': 'RpId'})
-                    if rp_id:
+                    elif rp_id:
                         event.set_Website(rp_id.text)
 
-
-                    image_name = event_data.find("Data", attrs={'Name': 'Name'})
-                    if image_name:
+                    elif image_name:
                         if image_name.text == "ImageName":
                             data_value = event_data.find("Data", attrs={'Name': 'Value'})
-                            if image_name.text == "ImageName" and data_value:
+                            if data_value:
                                 event.set_BrowserPath(data_value.text)
                                 event.set_Browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
 
                 """
+                type = None
                 for data in root.getchildren()[1].getchildren():
                     if "DevicePath" in data.values():
                         event.set_Device(data.text)
@@ -196,13 +163,11 @@ def read_evtx_file(evtx_file_path):
                         event.set_BrowserPath(data.text)
                         event.set_Browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
                         break  
-
-"""
-                
-
+                """
 
         # Print for presentation purposes
         #####################################
+        """
         for event in event_list:
             print("User Id:", event.userId)
             print("ID:", event.transactionId)
@@ -216,13 +181,14 @@ def read_evtx_file(evtx_file_path):
             print("-----------------------------------------------")
         print("Total Events:", len(event_list))
         print("-----------------------------------------------")
+        """
         ######################################
 
         # Create the output folder if it doesn't exist
         os.makedirs("output_files", exist_ok=True)
 
         # Gets current time and assigns name to new file
-        current_time = datetime.now().strftime("%d-%m-%Y_%Hh%Mm%Ss")
+        current_time = datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss")
         csv_file_path = os.path.join("output_files", f"passkey_logins_{current_time}.csv")
 
         with open(csv_file_path, 'w', newline='') as csvfile:
