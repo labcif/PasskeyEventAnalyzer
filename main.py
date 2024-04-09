@@ -1,13 +1,17 @@
 import argparse
+import read_evtx
+import read_registry
+from utils import functions as own_functions
 
 
 def main(data):
-    print("Hello World")
     if data.eventlog:
         print(f"Event Log: {data.eventlog}")
+        read_evtx.read_evtx_file(data.eventlog)
 
     if data.registry:
         print(f"Registry: {data.registry}")
+        read_registry.read_registry_file(data.registry)
 
 
 if __name__ == "__main__":

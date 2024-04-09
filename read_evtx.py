@@ -5,6 +5,7 @@ from lxml import etree
 from bs4 import BeautifulSoup
 from Evtx.Evtx import Evtx
 from datetime import datetime
+from utils import functions
 
 
 class PasskeyLog:
@@ -57,7 +58,7 @@ def object_to_row(event):
 
 
 def read_evtx_file(evtx_file_path):
-    print("------------------------------------ Reading File ------------------------------------")
+    # print("------------------------------------ Reading File ------------------------------------")
     # event_path = ".//{http://schemas.microsoft.com/win/2004/08/events/event}"
     reading = False
     event_list = []
@@ -208,7 +209,7 @@ if __name__ == "__main__":
     # Replace 'path_to_evtx_file.evtx' with the actual path to your EVTX file
     # evtx_file_path1 = r'event-logs\antes\Microsoft-Windows-WebAuthN%4Operational.evtx'
     # evtx_file_path2 = r'event-logs\depois_depois\Microsoft-Windows-WebAuthN%4Operational.evtx'
-    evtx_file_path3 = r'event-logs\recente\Microsoft-Windows-WebAuthN%4Operational.evtx'
+    evtx_file_path3 = r'event-logs\2024-04-03_00.00\Microsoft-Windows-WebAuthN%4Operational.evtx'
     # evtx_file_path4 = r'event-logs\windows10\Microsoft-Windows-WebAuthN%4Operational.evtx'
     if len(sys.argv) == 2:
         read_evtx_file(sys.argv[1])
