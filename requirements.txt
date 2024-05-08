@@ -2,3 +2,5 @@ regipy
 lxml
 python-evtx
 beautifulsoup4
+simplekml
+python-magic-bin==0.4.14

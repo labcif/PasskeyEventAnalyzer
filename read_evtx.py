@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 from Evtx.Evtx import Evtx
 from datetime import datetime
 from utils import functions
+from scripts.artifact_report import ArtifactHtmlReport
+from scripts.ilapfuncs import logfunc, tsv
 
 
 class PasskeyLog:
@@ -57,7 +59,7 @@ def object_to_row(event):
             event.website, event.timestamp, event.computerName, event.device, event.result]
 
 
-def read_evtx_file(evtx_file_path):
+def read_evtx_file(evtx_file_path, report_folder, file_path):
     # print("------------------------------------ Reading File ------------------------------------")
     # event_path = ".//{http://schemas.microsoft.com/win/2004/08/events/event}"
     reading = False
@@ -114,12 +116,14 @@ def read_evtx_file(evtx_file_path):
             elif event_id in ["1001", "1004"]:
                 reading = False
                 event.set_event_conclusion("Success")
-                event_list.append(event)
+                event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
+                                   event.website, event.timestamp, event.computerName, event.device, event.result))
             elif event_id in ["1002", "1005"]:
                 reading = False
                 event.set_device("N/A")
                 event.set_event_conclusion("Incomplete")
-                event_list.append(event)
+                event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
+                                   event.website, event.timestamp, event.computerName, event.device, event.result))
 
             if reading and event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
 
@@ -185,6 +189,7 @@ def read_evtx_file(evtx_file_path):
         """
         ######################################
 
+        """
         # Create the output folder if it doesn't exist
         os.makedirs("output_files", exist_ok=True)
 
@@ -203,6 +208,25 @@ def read_evtx_file(evtx_file_path):
                 writer.writerow(object_to_row(event))
 
         print(f"CSV file successfully created .")
+        """
+
+        if len(event_list) > 0:
+            report = ArtifactHtmlReport('Passkeys - Event Log')
+            report.start_artifact_report(report_folder, 'Passkeys - Event Log')
+            report.add_script()
+            data_headers = (
+            'userId', 'transaction_id', 'type', 'browser', 'browserPath', 'website', 'timestamp', 'computerName',
+            'device', 'result')
+
+            report.write_artifact_data_table(data_headers, event_list, file_path)
+            report.end_artifact_report()
+
+            tsvname = f'Passkeys - Event Log'
+
+            report_folder = os.path.join(report_folder, "passkeys") + '\\'
+            tsv(report_folder, data_headers, event_list, tsvname)
+        else:
+            logfunc('Passkeys - Event Log data available')
 
 
 if __name__ == "__main__":

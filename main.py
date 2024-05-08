@@ -2,16 +2,45 @@ import argparse
 import read_evtx
 import read_registry
 from utils import functions as own_functions
+from scripts.ilapfuncs import logfunc, tsv, timeline, is_platform_windows, open_sqlite_db_readonly, does_table_exist, \
+    OutputParameters, logdevinfo, logfunc
+from time import process_time, gmtime, strftime
+from scripts.report import generate_report
+import os
 
 
 def main(data):
+    input_path = ''  # TODO
+
+    start = process_time()
+
+    output_folder = data.output
+    if not output_folder:
+        output_folder = os.getcwd()
+
+    out_params = OutputParameters(output_folder)
+
+    logdevinfo()
+    logfunc()
+
+    log = open(os.path.join(out_params.report_folder_base, 'Script Logs', 'ProcessedFilesLog.html'), 'w+',
+               encoding='utf8')
+    nl = '\n'  # literal in order to have new lines in fstrings that create text files
+    log.write(f'Extraction/Path selected: {input_path}<br><br>')
+
     if data.eventlog:
         print(f"Event Log: {data.eventlog}")
-        read_evtx.read_evtx_file(data.eventlog)
+        read_evtx.read_evtx_file(data.eventlog, out_params.report_folder_base, input_path)
 
     if data.registry:
         print(f"Registry: {data.registry}")
-        read_registry.read_registry_file(data.registry)
+        read_registry.read_registry_file(data.registry, out_params.report_folder_base, input_path)
+
+    end = process_time()
+    run_time_secs = end - start
+    run_time_HMS = strftime('%H:%M:%S', gmtime(run_time_secs))
+
+    generate_report(out_params.report_folder_base, run_time_secs, run_time_HMS, 'fs', input_path)
 
 
 if __name__ == "__main__":
@@ -32,8 +61,16 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-rf",
-        "--registryfile",
+        "--registry",
         help="Path with registry file",
+        required=False,
+        default=None,
+        type=str)
+
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Output folder",
         required=False,
         default=None,
         type=str)
