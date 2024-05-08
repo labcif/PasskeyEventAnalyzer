@@ -2,7 +2,7 @@ import argparse
 import read_evtx
 import read_registry
 from utils import functions as own_functions
-from scripts.ilapfuncs import logfunc, tsv, timeline, is_platform_windows, open_sqlite_db_readonly, does_table_exist, \
+from scripts.ilapfuncs import logfunc, tsv, timeline, is_platform_windows, \
     OutputParameters, logdevinfo, logfunc
 from time import process_time, gmtime, strftime
 from scripts.report import generate_report
