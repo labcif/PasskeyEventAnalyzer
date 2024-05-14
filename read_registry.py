@@ -8,10 +8,10 @@ FILE_PATH = fr"windows-registry\2024-03-28_00.00\NTUSER.DAT"
 SEARCH_PATH = fr"\Software\Microsoft\Cryptography\FIDO"
 
 
-def read_registry_file(registry_file_path, report_folder, file_path):
+def read_registry_file(registry_file_path, report_folder, file_path, output_format):
     reg = RegistryHive(registry_file_path)
     fido_list = {}
-    linked_devices = [["User ID", "Device Name", "Device Data", "is Corrupted"]]  # [[<user_id>, <device_name>, <device_data>, <isCorrupted>], ...]
+    linked_devices = []  # [[<user_id>, <device_name>, <device_data>, <isCorrupted>], ...]
 
     for sk in reg.get_key(SEARCH_PATH).iter_subkeys():
         fido_list[sk.name] = None
@@ -49,23 +49,27 @@ def read_registry_file(registry_file_path, report_folder, file_path):
 
             linked_devices.append(linked_device.copy())
 
-    # own_functions.write_csv('output_files/linked_devices.csv', linked_devices)
-
-    if len(linked_devices) > 0:
-        report = ArtifactHtmlReport('Passkeys - registry')
-        report.start_artifact_report(report_folder, 'Passkeys - registry')
-        report.add_script()
+    if output_format == 'csv':
         data_headers = ('User ID', 'Device Name', 'Device Data', 'is Corrupted')
+        linked_devices.insert(0, data_headers)
+        own_functions.write_csv(os.path.join(report_folder, 'linked_devices.csv'), linked_devices)
 
-        report.write_artifact_data_table(data_headers, linked_devices, file_path)
-        report.end_artifact_report()
+    elif output_format == 'html':
+        if len(linked_devices) > 0:
+            report = ArtifactHtmlReport('Passkeys - registry')
+            report.start_artifact_report(report_folder, 'Passkeys - registry')
+            report.add_script()
+            data_headers = ('User ID', 'Device Name', 'Device Data', 'is Corrupted')
 
-        tsvname = f'Passkeys - registry'
+            report.write_artifact_data_table(data_headers, linked_devices, file_path)
+            report.end_artifact_report()
 
-        report_folder = os.path.join(report_folder, "passkeys") + '\\'
-        tsv(report_folder, data_headers, linked_devices, tsvname)
-    else:
-        logfunc('Passkeys - registry data available')
+            tsvname = f'Passkeys - registry'
+
+            report_folder = os.path.join(report_folder, "passkeys") + '\\'
+            tsv(report_folder, data_headers, linked_devices, tsvname)
+        else:
+            logfunc('Passkeys - registry data available')
 
 
 if __name__ == '__main__':

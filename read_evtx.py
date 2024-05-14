@@ -5,7 +5,7 @@ from lxml import etree
 from bs4 import BeautifulSoup
 from Evtx.Evtx import Evtx
 from datetime import datetime
-from utils import functions
+from utils import functions as own_functions
 from scripts.artifact_report import ArtifactHtmlReport
 from scripts.ilapfuncs import logfunc, tsv
 
@@ -59,7 +59,7 @@ def object_to_row(event):
             event.website, event.timestamp, event.computerName, event.device, event.result]
 
 
-def read_evtx_file(evtx_file_path, report_folder, file_path):
+def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
     # print("------------------------------------ Reading File ------------------------------------")
     # event_path = ".//{http://schemas.microsoft.com/win/2004/08/events/event}"
     reading = False
@@ -189,44 +189,31 @@ def read_evtx_file(evtx_file_path, report_folder, file_path):
         """
         ######################################
 
-        """
-        # Create the output folder if it doesn't exist
-        os.makedirs("output_files", exist_ok=True)
-
-        # Gets current time and assigns name to new file
-        current_time = datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss")
-        csv_file_path = os.path.join("output_files", f"passkey_logins_{current_time}.csv")
-
-        with open(csv_file_path, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            # header line
-            writer.writerow(
-                ['userId', 'transaction_id', 'type', 'browser', 'browserPath', 'website', 'timestamp', 'computerName',
-                 'device', 'result'])
-            # Input each event to a line
-            for event in event_list:
-                writer.writerow(object_to_row(event))
-
-        print(f"CSV file successfully created .")
-        """
-
-        if len(event_list) > 0:
-            report = ArtifactHtmlReport('Passkeys - Event Log')
-            report.start_artifact_report(report_folder, 'Passkeys - Event Log')
-            report.add_script()
+        if output_format == 'csv':
             data_headers = (
-            'userId', 'transaction_id', 'type', 'browser', 'browserPath', 'website', 'timestamp', 'computerName',
-            'device', 'result')
+                'userId', 'transaction_id', 'type', 'browser', 'browserPath', 'website', 'timestamp', 'computerName',
+                'device', 'result')
+            event_list.insert(0, data_headers)
+            own_functions.write_csv(os.path.join(report_folder, 'passkey_logs.csv'), event_list)
 
-            report.write_artifact_data_table(data_headers, event_list, file_path)
-            report.end_artifact_report()
+        elif output_format == 'html':
+            if len(event_list) > 0:
+                report = ArtifactHtmlReport('Passkeys - Event Log')
+                report.start_artifact_report(report_folder, 'Passkeys - Event Log')
+                report.add_script()
+                data_headers = (
+                'userId', 'transaction_id', 'type', 'browser', 'browserPath', 'website', 'timestamp', 'computerName',
+                'device', 'result')
 
-            tsvname = f'Passkeys - Event Log'
+                report.write_artifact_data_table(data_headers, event_list, file_path)
+                report.end_artifact_report()
 
-            report_folder = os.path.join(report_folder, "passkeys") + '\\'
-            tsv(report_folder, data_headers, event_list, tsvname)
-        else:
-            logfunc('Passkeys - Event Log data available')
+                tsvname = f'Passkeys - Event Log'
+
+                report_folder = os.path.join(report_folder, "passkeys") + '\\'
+                tsv(report_folder, data_headers, event_list, tsvname)
+            else:
+                logfunc('Passkeys - Event Log data available')
 
 
 if __name__ == "__main__":
