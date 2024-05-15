@@ -1,4 +1,5 @@
 from regipy.registry import RegistryHive
+from regipy.utils import convert_wintime
 from scripts.artifact_report import ArtifactHtmlReport
 from scripts.ilapfuncs import logfunc, tsv
 import os
@@ -11,7 +12,7 @@ SEARCH_PATH = fr"\Software\Microsoft\Cryptography\FIDO"
 def read_registry_file(registry_file_path, report_folder, file_path, output_format):
     reg = RegistryHive(registry_file_path)
     fido_list = {}
-    linked_devices = []  # [[<user_id>, <device_name>, <device_data>, <isCorrupted>], ...]
+    linked_devices = []  # [[<user_id>, <device_name>, <device_data>, <last_modified>, <isCorrupted>], ...]
 
     for sk in reg.get_key(SEARCH_PATH).iter_subkeys():
         fido_list[sk.name] = None
@@ -28,7 +29,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
 
     for fido in fido_list:
         # print(fido)  # User ID
-        linked_device = [fido, None, None, None]  # [<user_id>, <device_name>, <device_data>, <isCorrupted>]
+        linked_device = [fido, None, None, None, None]  # [<user_id>, <device_name>, <device_data>, <last_modified>, <isCorrupted>]
 
         device_element = []
         for device in fido_list[fido]:
@@ -38,19 +39,22 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
             path = rf'\Software\Microsoft\Cryptography\FIDO'
             path += f'\\' + str(fido) + rf'\LinkedDevices'
             path += f'\\' + str(device)
-            data = reg.get_key(path).get_values()
-            for i in data:
+            data = reg.get_key(path)
+
+            for i in data.get_values():
                 # print("\t\t" + str(i))
                 if i.name == "Name":
                     linked_device[1] = i.value
                 if i.name == "Data" and i.value_type == 'REG_BINARY':
                     linked_device[2] = i.value.hex().upper()
-                linked_device[3] = i.is_corrupted
+                linked_device[4] = i.is_corrupted
+
+            linked_device[3] = convert_wintime(data.header.last_modified, as_json=False)
 
             linked_devices.append(linked_device.copy())
 
     if output_format == 'csv':
-        data_headers = ('User ID', 'Device Name', 'Device Data', 'is Corrupted')
+        data_headers = ('User ID', 'Device Name', 'Device Data', 'Last Modified', 'is Corrupted')
         linked_devices.insert(0, data_headers)
         own_functions.write_csv(os.path.join(report_folder, 'linked_devices.csv'), linked_devices)
 
@@ -59,7 +63,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
             report = ArtifactHtmlReport('Passkeys - registry')
             report.start_artifact_report(report_folder, 'Passkeys - registry')
             report.add_script()
-            data_headers = ('User ID', 'Device Name', 'Device Data', 'is Corrupted')
+            data_headers = ('User ID', 'Device Name', 'Device Data', 'Last Modified','is Corrupted')
 
             report.write_artifact_data_table(data_headers, linked_devices, file_path)
             report.end_artifact_report()
@@ -73,4 +77,4 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
 
 
 if __name__ == '__main__':
-    read_registry_file(FILE_PATH)
+    read_registry_file(FILE_PATH, None, None, None)
