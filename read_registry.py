@@ -12,7 +12,7 @@ SEARCH_PATH = fr"\Software\Microsoft\Cryptography\FIDO"
 def read_registry_file(registry_file_path, report_folder, file_path, output_format):
     reg = RegistryHive(registry_file_path)
     fido_list = {}
-    linked_devices = []  # [[<user_id>, <device_name>, <device_data>, <last_modified>, <isCorrupted>], ...]
+    linked_devices = []  # [[<user_id>, <device_name>, <last_modified>, <isCorrupted>, <device_data>], ...]
 
     for sk in reg.get_key(SEARCH_PATH).iter_subkeys():
         fido_list[sk.name] = None
@@ -29,7 +29,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
 
     for fido in fido_list:
         # print(fido)  # User ID
-        linked_device = [fido, None, None, None, None]  # [<user_id>, <device_name>, <device_data>, <last_modified>, <isCorrupted>]
+        linked_device = [fido, None, None, None, None]  # [<user_id>, <device_name>, <last_modified>, <isCorrupted>, <device_data>]
 
         device_element = []
         for device in fido_list[fido]:
@@ -46,10 +46,10 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
                 if i.name == "Name":
                     linked_device[1] = i.value
                 if i.name == "Data" and i.value_type == 'REG_BINARY':
-                    linked_device[2] = i.value.hex().upper()
-                linked_device[4] = i.is_corrupted
+                    linked_device[4] = i.value.hex().upper()
+                linked_device[3] = i.is_corrupted
 
-            linked_device[3] = convert_wintime(data.header.last_modified, as_json=False)
+            linked_device[2] = convert_wintime(data.header.last_modified, as_json=False)
 
             linked_devices.append(linked_device.copy())
 
@@ -63,7 +63,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
             report = ArtifactHtmlReport('Passkeys - registry')
             report.start_artifact_report(report_folder, 'Passkeys - registry')
             report.add_script()
-            data_headers = ('User ID', 'Device Name', 'Device Data', 'Last Modified','is Corrupted')
+            data_headers = ('User ID', 'Device Name', 'Last Modified','is Corrupted', 'Device Data')
 
             report.write_artifact_data_table(data_headers, linked_devices, file_path)
             report.end_artifact_report()

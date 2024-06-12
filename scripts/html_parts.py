@@ -205,12 +205,12 @@ thank_you_note = \
                             </div>
                             <div class="col-md-8">
                             <div class="card-body">
-                                <h5 class="card-title">Thank you for using WLEAPP</h5>
+                                <h5 class="card-title">Adapted from WLEAPP html report</h5>
                                 <p class="card-text">
-                                    Support open source and report any bugs!
+                                    This report was generated using WLEAPP, a tool developed by the WLEAPP team.
                                 </p>
                                 <!--Github-->
-                                <a class="btn-floating btn-git" type="button" role="button" href="https://github.com/abrignoni/wleapp" target="_blank"><i class="fab fa-github"></i> Project Home </a>
+                                <a class="btn-floating btn-git" type="button" role="button" href="https://github.com/abrignoni/wleapp" target="_blank"><i class="fab fa-github"></i>WLEAPP Project Home </a>
                                 <p class="card-text fadeIn"><small class="text-muted">WLEAPP Team</small></p>
                             </div>
                             </div>

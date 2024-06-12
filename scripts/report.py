@@ -212,14 +212,14 @@ def create_index_html(reportfolderbase, time_in_secs, time_HMS, extraction_type,
 
     # WRITE INDEX.HTML LAST
     filename = 'index.html'
-    page_title = 'WLEAPP Report'
-    body_heading = 'Windows Logs Events And Properties Parser'
-    body_description = 'WLEAPP is an open source project that aims to parse Windows OS artifacts for the purpose of triage analysis.'
+    page_title = 'Passkeys Forensics Report'
+    body_heading = 'Windows Passkeys artifacts Parser'
+    body_description = 'Adapted from WLEAPP html report'
     active_nav_list_data = mark_item_active(nav_list_data, filename) + nav_bar_script
 
     f = open(os.path.join(reportfolderbase, filename), 'w', encoding='utf8')
     f.write(page_header.format(page_title))
-    f.write(body_start.format(f"WLEAPP {wleapp_version}"))
+    f.write(body_start.format(f"Passkeys Forensics {wleapp_version}"))
     f.write(body_sidebar_setup + active_nav_list_data + body_sidebar_trailer)
     f.write(body_main_header + body_main_data_title.format(body_heading, body_description))
     f.write(content)
