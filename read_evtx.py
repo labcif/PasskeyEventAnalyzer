@@ -1,10 +1,7 @@
 import os
 import sys
-import csv
-from lxml import etree
 from bs4 import BeautifulSoup
 from Evtx.Evtx import Evtx
-from datetime import datetime
 from utils import functions as own_functions
 from scripts.artifact_report import ArtifactHtmlReport
 from scripts.ilapfuncs import logfunc, tsv
@@ -75,8 +72,6 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
             if event_id:
                 event_id = event_id.text
 
-            # event_id = root.find(event_path + "EventID").text
-
             #####################################
             # 1000: Start Registration          #
             # 1001: Registration Success        #
@@ -95,7 +90,6 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
                 transaction_id = soup.find("Data", attrs={'Name': 'TransactionId'})
                 if transaction_id:
                     event.set_transaction_id(transaction_id.text)
-                    # event.set_transaction_id(root.getchildren()[1].getchildren()[0].text)
 
                 event.set_timestamp(record.timestamp())
 
@@ -103,13 +97,11 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
                 computer_name = computer_name.find("Computer")
                 if computer_name:
                     event.set_computer_name(computer_name.text)
-                # event.set_computer_name(root.find(event_path + 'Computer').text)
 
                 user_id = soup.find("Security")
                 user_id = user_id.get('UserID')
                 if user_id:
                     event.set_user_id(user_id)
-                # event.set_user_id(root.find(event_path + 'Security').attrib.values()[0])
 
                 event.set_event_type("Authentication" if event_id == "1003" else "Registration")
                 reading = True
@@ -126,19 +118,11 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
                                    event.website, event.timestamp, event.computerName, event.device, event.result))
 
             if reading and event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
-
                 event_data = soup.find("EventData")
-
                 if event_data:
-
                     device_path = event_data.find("Data", attrs={'Name': 'DevicePath'})
                     rp_id = event_data.find("Data", attrs={'Name': 'RpId'})
                     image_name = event_data.find("Data", attrs={'Name': 'Name'})
-
-                    if device_path:
-                        event.set_device(device_path.text)
-                        if device_path.text == "":
-                            event.device = event.computerName
 
                     elif rp_id:
                         event.set_website(rp_id.text)
@@ -150,44 +134,6 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
                                 event.set_browser_path(data_value.text)
                                 event.set_browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
 
-                """
-                type = None
-                for data in root.getchildren()[1].getchildren():
-                    if "DevicePath" in data.values():
-                        event.set_device(data.text)
-                        if (event.device is None):
-                            event.device = event.computerName
-                        break
-                    elif "RpId" in data.values():
-                        event.set_website(data.text)
-                        break
-                    elif "ImageName" == data.text:
-                        type = data.text
-                        continue
-                    elif (type == "ImageName" and "Value" in data.values()):
-                        event.set_browser_path(data.text)
-                        event.set_browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
-                        break  
-                """
-
-        # Print for presentation purposes
-        #####################################
-        """
-        for event in event_list:
-            print("User Id:", event.userId)
-            print("ID:", event.transactionId)
-            print("Event:", event.type)
-            print("Result:", event.result)
-            print("Browser Info: [", event.browser, "]", event.browserPath)
-            print("Website:", event.website)
-            print("Time:", event.timestamp)
-            print("Computer Name:", event.computerName)
-            print("Auth Device:", event.device)
-            print("-----------------------------------------------")
-        print("Total Events:", len(event_list))
-        print("-----------------------------------------------")
-        """
-        ######################################
 
         if output_format == 'csv':
             data_headers = (

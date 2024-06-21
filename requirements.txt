@@ -1,5 +1,4 @@
 regipy
-lxml
 python-evtx
 beautifulsoup4
 simplekml
