@@ -1,4 +1,5 @@
 import os
+from time import strftime
 import sys
 from bs4 import BeautifulSoup
 from Evtx.Evtx import Evtx
@@ -61,9 +62,10 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
     # event_path = ".//{http://schemas.microsoft.com/win/2004/08/events/event}"
     reading = False
     event_list = []
-
+    print("---A iniciar a leitura do ficheiro evtx---")
     with Evtx(evtx_file_path) as evtx:
         for record in evtx.records():
+
 
             # root = etree.fromstring(record.xml())
             soup = BeautifulSoup(record.xml(), 'xml')
@@ -104,12 +106,14 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
                     event.set_user_id(user_id)
 
                 event.set_event_type("Authentication" if event_id == "1003" else "Registration")
+                print('Operação encontrada: Tipo ', event.type, ' no dia ',  event.timestamp.strftime("%d de %B"))
                 reading = True
             elif event_id in ["1001", "1004"]:
                 reading = False
                 event.set_event_conclusion("Success")
                 event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
                                    event.website, event.timestamp, event.computerName, event.device, event.result))
+
             elif event_id in ["1002", "1005"]:
                 reading = False
                 event.set_device("N/A")
@@ -124,7 +128,7 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
                     rp_id = event_data.find("Data", attrs={'Name': 'RpId'})
                     image_name = event_data.find("Data", attrs={'Name': 'Name'})
 
-                    elif rp_id:
+                    if rp_id:
                         event.set_website(rp_id.text)
 
                     elif image_name:
@@ -134,13 +138,14 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
                                 event.set_browser_path(data_value.text)
                                 event.set_browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
 
-
         if output_format == 'csv':
             data_headers = (
                 'userId', 'transaction_id', 'type', 'browser', 'browserPath', 'website', 'timestamp', 'computerName',
                 'device', 'result')
             event_list.insert(0, data_headers)
             own_functions.write_csv(os.path.join(report_folder, 'passkey_logs.csv'), event_list)
+            print('---Sucesso, foram registadas ' + str(len(event_list)) + ' operações Passkey---')
+
 
         elif output_format == 'html':
             if len(event_list) > 0:
@@ -158,6 +163,7 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
 
                 report_folder = os.path.join(report_folder, "passkeys") + '\\'
                 tsv(report_folder, data_headers, event_list, tsvname)
+                print('---Sucesso, foram registadas ' + str(len(event_list)) + ' operações Passkey---')
             else:
                 logfunc('Passkeys - Event Log data available')
 

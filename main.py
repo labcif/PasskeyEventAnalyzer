@@ -7,7 +7,7 @@ from scripts.ilapfuncs import logfunc, tsv, timeline, is_platform_windows, \
 from time import process_time, gmtime, strftime
 from scripts.report import generate_report
 import os
-import datetime
+
 
 def main(data):
     start = process_time()
@@ -33,6 +33,7 @@ def main(data):
 
     # ======================= File Processing =======================
 
+    print('- ANALISADOR FORENSE PASSKEYS - ', strftime("%d/%m/%Y %H:%M:%S"))
     if data.eventlog:
         # print(f"Event Log: {data.eventlog}")
         read_evtx.read_evtx_file(data.eventlog, out_params.report_folder_base, input_path, output_format)
@@ -41,6 +42,7 @@ def main(data):
         # print(f"Registry: {data.registry}")
         read_registry.read_registry_file(data.registry, out_params.report_folder_base, input_path, output_format)
 
+    print('TERMINADO - para mais detalhes consulte os resultados na pasta de output.')
     # ======================= Terminate Report =======================
 
     end = process_time()

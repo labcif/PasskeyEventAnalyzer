@@ -13,7 +13,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
     reg = RegistryHive(registry_file_path)
     fido_list = {}
     linked_devices = []  # [[<user_id>, <device_name>, <last_modified>, <isCorrupted>, <device_data>], ...]
-
+    print('---A analizar o ficheiro registry fornecido---')
     for sk in reg.get_key(SEARCH_PATH).iter_subkeys():
         fido_list[sk.name] = None
 
@@ -36,6 +36,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
             # print("\t" + device)
             device_element.append(device)
 
+
             path = rf'\Software\Microsoft\Cryptography\FIDO'
             path += f'\\' + str(fido) + rf'\LinkedDevices'
             path += f'\\' + str(device)
@@ -45,6 +46,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
                 # print("\t\t" + str(i))
                 if i.name == "Name":
                     linked_device[1] = i.value
+                    print('Dispositivo encontrado: ', i.value)
                 if i.name == "Data" and i.value_type == 'REG_BINARY':
                     linked_device[4] = i.value.hex().upper()
                 linked_device[3] = i.is_corrupted
@@ -54,11 +56,14 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
             linked_devices.append(linked_device.copy())
 
     if output_format == 'csv':
+        print('---Sucesso, foram encontrados ' + str(len(linked_devices)) + ' dispositivos associados---')
         data_headers = ('User ID', 'Device Name', 'Device Data', 'Last Modified', 'is Corrupted')
         linked_devices.insert(0, data_headers)
         own_functions.write_csv(os.path.join(report_folder, 'linked_devices.csv'), linked_devices)
 
+
     elif output_format == 'html':
+        print('---Sucesso, foram encontrados ' + str(len(linked_devices)) + ' dispositivos associados---')
         if len(linked_devices) > 0:
             report = ArtifactHtmlReport('Passkeys - registry')
             report.start_artifact_report(report_folder, 'Passkeys - registry')
