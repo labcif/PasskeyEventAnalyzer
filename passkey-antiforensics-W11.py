@@ -1,43 +1,25 @@
-from Evtx.Evtx import Evtx
 import winreg
 import os
 import psutil
 
 
-def delete_registry_key_recursive(hive, subkey):
-    """
-    Recursively deletes a registry key and all its subkeys/values.
-
-    :param hive: The hive constant (e.g., winreg.HKEY_USERS).
-    :param subkey: The subkey path.
-    """
+def delete_key(key, sub_key_name: str):
     try:
-        with winreg.OpenKey(hive, subkey, 0, winreg.KEY_ALL_ACCESS) as key:
-            # Get the subkeys and recursively delete them
-            i = 0
+        with winreg.OpenKey(key, sub_key_name) as sub_key:
             while True:
                 try:
-                    subkey_name = winreg.EnumKey(key, i)
-                    delete_registry_key_recursive(hive, f"{subkey}\\{subkey_name}")
+                    sub_sub_key_name = winreg.EnumKey(sub_key, 0)
+                    delete_key(sub_key, sub_sub_key_name)
                 except OSError:
                     break
-                i += 1
-            winreg.DeleteKey(key, "")
-            print(f"Successfully deleted key {hive}\\{subkey}")
-    except FileNotFoundError:
-        print(f"The specified registry key does not exist: {hive}\\{subkey}")
-    except PermissionError:
-        print(f"Permission denied. Please run the script as an administrator.")
-    except Exception as e:
-        print(f"An error occurred while trying to delete the registry key: {e}")
-        
-def find_process_using_file(file_path):
-    """
-    Find the process using the specified file.
+        winreg.DeleteKey(key, sub_key_name)
+        print("Os dispositivos associados foram eliminados com sucesso")
+    except:
+        print(f"A Chave {key}\\{sub_key_name} não existe ou não encontrada")
 
-    :param file_path: The path to the file.
-    :return: The process using the file, or None if no process is found.
-    """
+
+
+def find_process_using_file(file_path):
     for proc in psutil.process_iter(['pid', 'name', 'open_files']):
         try:
             open_files = proc.info['open_files']
@@ -65,31 +47,26 @@ def delete_evtx_file(evtx_filename):
             # Find the process using the file
             proc = find_process_using_file(evtx_file_path)
             if proc:
-                print(f"Process {proc.info['name']} (PID: {proc.info['pid']}) is using the file.")
-                print(f"Terminating process {proc.info['name']} (PID: {proc.info['pid']}).")
+                print(f"Processo {proc.info['name']} (PID: {proc.info['pid']}) está a usar este ficheiro.")
+                print(f"A terminar o processo {proc.info['name']} (PID: {proc.info['pid']}) para eliminar o ficheiro.")
                 proc.terminate()
                 proc.wait()  # Wait for the process to terminate
 
             # Attempt to delete the file
             os.remove(evtx_file_path)
-            print(f"Successfully deleted {evtx_file_path}")
+            print(f"Ficheiro EVTX eliminado com sucesso {evtx_file_path}")
         else:
-            print(f"The file {evtx_file_path} does not exist.")
+            print(f"O ficheiro {evtx_file_path} não existe.")
     except Exception as e:
-        print(f"An error occurred while trying to delete the file: {e}")
+        print(f"Ocorreu um erro ao tentar eliminar o ficheiro: {e}")
 
 
 # Example usage
 if __name__ == "__main__":
-
-    hive = winreg.HKEY_USERS
-    subkey = r"\S-1-5-20\Software\Microsoft\Cryptography\FIDO"
+    # Call the function to delete the EVTX file
+    delete_evtx_file("Microsoft-Windows-WebAuthN%4Operational.evtx")
 
     # Call the function to delete the registry key
-    delete_registry_key_recursive(hive, subkey)
+    delete_key(winreg.HKEY_USERS, r"S-1-5-20\Software\Microsoft\Cryptography\FIDO")
 
-    # Define the EVTX file name
-    evtx_filename = "Microsoft-Windows-WebAuthN%4Operational.evtx"
 
-    # Call the function to delete the EVTX file
-    delete_evtx_file(evtx_filename)
