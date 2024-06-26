@@ -61,7 +61,7 @@ if __name__ == "__main__":
         epilog='Developed by: Pedro Chen and Bruno Correia')
 
     parser.add_argument(
-        "-el",
+        "-e",
         "--eventlog",
         help="Path with event log file",
         required=False,
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         type=str)
 
     parser.add_argument(
-        "-rf",
+        "-r",
         "--registry",
         help="Path with registry file",
         required=False,
