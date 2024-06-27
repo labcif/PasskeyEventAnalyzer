@@ -1,5 +1,4 @@
 import os
-from time import strftime
 import sys
 from bs4 import BeautifulSoup
 from Evtx.Evtx import Evtx

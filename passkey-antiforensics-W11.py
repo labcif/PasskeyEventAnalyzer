@@ -13,9 +13,9 @@ def delete_key(key, sub_key_name: str):
                 except OSError:
                     break
         winreg.DeleteKey(key, sub_key_name)
-        print("Os dispositivos associados foram eliminados com sucesso")
+        print("--Os dispositivos associados foram eliminados com sucesso--")
     except:
-        print(f"A Chave {key}\\{sub_key_name} não existe ou não encontrada")
+        print(f"A Chave {key}\\{sub_key_name} não existe ou não foi encontrada")
 
 
 
@@ -39,7 +39,7 @@ def delete_evtx_file(evtx_filename):
     :param evtx_filename: The name of the EVTX file to delete.
     """
     # Construct the full path to the EVTX file
-    evtx_file_path = os.path.join("C:\\Windows\\System32\\winevt\\Logs", evtx_filename)
+    evtx_file_path = os.path.join(os.environ['WINDIR'], "\\Windows\\System32\\winevt\\Logs", evtx_filename)
 
     try:
         # Check if the file exists
@@ -54,7 +54,7 @@ def delete_evtx_file(evtx_filename):
 
             # Attempt to delete the file
             os.remove(evtx_file_path)
-            print(f"Ficheiro EVTX eliminado com sucesso {evtx_file_path}")
+            print(f"--Ficheiro EVTX eliminado com sucesso {evtx_file_path}--")
         else:
             print(f"O ficheiro {evtx_file_path} não existe.")
     except Exception as e:
@@ -63,10 +63,11 @@ def delete_evtx_file(evtx_filename):
 
 # Example usage
 if __name__ == "__main__":
-    # Call the function to delete the EVTX file
+    print("--- Passkey Anti Forense ---")
+    print("A tentar eliminar ficheiro EVTX")
     delete_evtx_file("Microsoft-Windows-WebAuthN%4Operational.evtx")
 
-    # Call the function to delete the registry key
+    print("A tentar eliminar entradas no registry")
     delete_key(winreg.HKEY_USERS, r"S-1-5-20\Software\Microsoft\Cryptography\FIDO")
 
 
