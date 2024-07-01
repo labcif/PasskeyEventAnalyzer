@@ -2,23 +2,6 @@ import winreg
 import os
 import psutil
 
-
-def delete_key(key, sub_key_name: str):
-    try:
-        with winreg.OpenKey(key, sub_key_name) as sub_key:
-            while True:
-                try:
-                    sub_sub_key_name = winreg.EnumKey(sub_key, 0)
-                    delete_key(sub_key, sub_sub_key_name)
-                except OSError:
-                    break
-        winreg.DeleteKey(key, sub_key_name)
-        print("--Os dispositivos associados foram eliminados com sucesso--")
-    except:
-        print(f"A Chave {key}\\{sub_key_name} não existe ou não foi encontrada")
-
-
-
 def find_process_using_file(file_path):
     for proc in psutil.process_iter(['pid', 'name', 'open_files']):
         try:
@@ -61,6 +44,21 @@ def delete_evtx_file(evtx_filename):
         print(f"Ocorreu um erro ao tentar eliminar o ficheiro: {e}")
 
 
+def delete_registry_key(key, sub_key_name: str):
+    try:
+        with winreg.OpenKey(key, sub_key_name) as sub_key:
+            while True:
+                try:
+                    sub_sub_key_name = winreg.EnumKey(sub_key, 0)
+                    delete_registry_key(sub_key, sub_sub_key_name)
+                except OSError:
+                    break
+        winreg.DeleteKey(key, sub_key_name)
+        print("--Os dispositivos associados foram eliminados com sucesso--")
+    except:
+        print(f"A Chave {key}\\{sub_key_name} não existe ou não foi encontrada")
+
+
 # Example usage
 if __name__ == "__main__":
     print("--- Passkey Anti Forense ---")
@@ -68,6 +66,6 @@ if __name__ == "__main__":
     delete_evtx_file("Microsoft-Windows-WebAuthN%4Operational.evtx")
 
     print("A tentar eliminar entradas no registry")
-    delete_key(winreg.HKEY_USERS, r"S-1-5-20\Software\Microsoft\Cryptography\FIDO")
+    delete_registry_key(winreg.HKEY_USERS, r"S-1-5-20\Software\Microsoft\Cryptography\FIDO")
 
 
