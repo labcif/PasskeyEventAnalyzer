@@ -6,7 +6,7 @@ import os
 from utils import functions as own_functions
 
 FILE_PATH = fr"windows-registry\2024-03-28_00.00\NTUSER.DAT"
-SEARCH_PATH = fr"\Software\Microsoft\Cryptography\FIDO"
+SEARCH_PATH = fr"S-1-5-20\Software\Microsoft\Cryptography\FIDO"
 
 
 def read_registry_file(registry_file_path, report_folder, file_path, output_format):
@@ -20,7 +20,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
     for fido_sk in fido_list:
         device_list = {}
 
-        path = rf'\Software\Microsoft\Cryptography\FIDO'
+        path = SEARCH_PATH
         path += f'\\' + str(fido_sk) + rf'\LinkedDevices'
         for device_sk in reg.get_key(path).iter_subkeys():
             device_list[device_sk.name] = None
@@ -29,15 +29,11 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
 
     for fido in fido_list:
         # print(fido)  # User ID
-        linked_device = [fido, None, None, None, None]  # [<user_id>, <device_name>, <last_modified>, <isCorrupted>, <device_data>]
+        linked_device = [fido, None, None, None, None]  # [<user_id>, <device_name>, <last_modified>, <is_corrupted>, <device_data>]
 
-        device_element = []
         for device in fido_list[fido]:
-            # print("\t" + device)
-            device_element.append(device)
 
-
-            path = rf'\Software\Microsoft\Cryptography\FIDO'
+            path = SEARCH_PATH
             path += f'\\' + str(fido) + rf'\LinkedDevices'
             path += f'\\' + str(device)
             data = reg.get_key(path)
