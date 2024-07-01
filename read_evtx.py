@@ -57,16 +57,12 @@ def object_to_row(event):
 
 
 def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
-    # print("------------------------------------ Reading File ------------------------------------")
-    # event_path = ".//{http://schemas.microsoft.com/win/2004/08/events/event}"
-    reading = False
     event_list = []
     print("---A iniciar a leitura do ficheiro evtx---")
     with Evtx(evtx_file_path) as evtx:
         for record in evtx.records():
 
 
-            # root = etree.fromstring(record.xml())
             soup = BeautifulSoup(record.xml(), 'xml')
 
             event_id = soup.find("EventID")
@@ -106,36 +102,40 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
 
                 event.set_event_type("Authentication" if event_id == "1003" else "Registration")
                 print('Operação encontrada: Tipo ', event.type, ' no dia ',  event.timestamp.strftime("%d de %B"))
-                reading = True
             elif event_id in ["1001", "1004"]:
-                reading = False
                 event.set_event_conclusion("Success")
                 event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
                                    event.website, event.timestamp, event.computerName, event.device, event.result))
-
+                continue
             elif event_id in ["1002", "1005"]:
-                reading = False
-                event.set_device("N/A")
                 event.set_event_conclusion("Incomplete")
                 event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
                                    event.website, event.timestamp, event.computerName, event.device, event.result))
+                continue
 
-            if reading and event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
+            if event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
                 event_data = soup.find("EventData")
+
                 if event_data:
-                    device_path = event_data.find("Data", attrs={'Name': 'DevicePath'})
+                    device = event_data.find("Data", attrs={'Name': 'DevicePath'})
                     rp_id = event_data.find("Data", attrs={'Name': 'RpId'})
                     image_name = event_data.find("Data", attrs={'Name': 'Name'})
 
                     if rp_id:
                         event.set_website(rp_id.text)
-
                     elif image_name:
                         if image_name.text == "ImageName":
                             data_value = event_data.find("Data", attrs={'Name': 'Value'})
                             if data_value:
                                 event.set_browser_path(data_value.text)
                                 event.set_browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
+
+                    if device and device.text:
+                        event.set_device(device.text)
+                    else:
+                        event.set_device(computer_name.text + ' (This Device)')
+
+
 
         if output_format == 'csv':
             data_headers = (
