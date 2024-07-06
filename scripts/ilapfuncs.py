@@ -22,8 +22,7 @@ class OutputParameters:
         self.report_folder_base = os.path.join(output_folder, 'Passkeys_Reports_' + currenttime) # aleapp , aleappGUI, ileap_artifacts, report.py
         self.temp_folder = os.path.join(self.report_folder_base, 'temp')
         OutputParameters.screen_output_file_path = os.path.join(self.report_folder_base, 'Script Logs', 'Screen Output.html')
-        OutputParameters.screen_output_file_path_devinfo = os.path.join(self.report_folder_base, 'Script Logs', 'DeviceInfo.html')
-        
+
         os.makedirs(os.path.join(self.report_folder_base, 'Script Logs'))
         os.makedirs(self.temp_folder)
 
@@ -63,28 +62,11 @@ def get_next_unused_name(path):
         num += 1
     return os.path.join(folder, new_name)
 
-class GuiWindow:
-    '''This only exists to hold window handle if script is run from GUI'''
-    window_handle = None # static variable 
-    progress_bar_total = 0
-    progress_bar_handle = None
-
-    @staticmethod
-    def SetProgressBar(n):
-        if GuiWindow.progress_bar_handle:
-            GuiWindow.progress_bar_handle.UpdateBar(n)
-
 def logfunc(message=""):
     with open(OutputParameters.screen_output_file_path, 'a', encoding='utf8') as a:
         print(message)
         a.write(message + '<br>' + OutputParameters.nl)
-
-    if GuiWindow.window_handle:
-        GuiWindow.window_handle.refresh()
         
-def logdevinfo(message=""):
-    with open(OutputParameters.screen_output_file_path_devinfo, 'a', encoding='utf8') as b:
-        b.write(message + '<br>' + OutputParameters.nl)
     
 """ def deviceinfoin(ordes, kas, vas, sources): # unused function
     sources = str(sources)

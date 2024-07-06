@@ -10,6 +10,7 @@ SEARCH_PATH = fr"S-1-5-20\Software\Microsoft\Cryptography\FIDO"
 
 
 def read_registry_file(registry_file_path, report_folder, file_path, output_format):
+
     reg = RegistryHive(registry_file_path)
     fido_list = {}
     linked_devices = []  # [[<user_id>, <device_name>, <last_modified>, <isCorrupted>, <device_data>], ...]
@@ -62,7 +63,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
 
     if output_format == 'csv':
         print('---Sucesso, foram encontrados ' + str(len(linked_devices)) + ' dispositivos associados---')
-        data_headers = ('User ID', 'Device Name', 'Device Data', 'Last Modified', 'is Corrupted')
+        data_headers = ('User ID', 'Device Name', 'Device Data', 'Last Modified', 'Is Corrupted')
         linked_devices.insert(0, data_headers)
         own_functions.write_csv(os.path.join(report_folder, 'linked_devices.csv'), linked_devices)
 
@@ -70,15 +71,15 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
     elif output_format == 'html':
         print('---Sucesso, foram encontrados ' + str(len(linked_devices)) + ' dispositivos associados---')
         if len(linked_devices) > 0:
-            report = ArtifactHtmlReport('Passkeys - registry')
-            report.start_artifact_report(report_folder, 'Passkeys - registry')
+            report = ArtifactHtmlReport('Passkeys - Registry')
+            report.start_artifact_report(report_folder, 'Passkeys - Registry')
             report.add_script()
-            data_headers = ('User ID', 'Device Name', 'Last Modified','is Corrupted', 'Device Data')
+            data_headers = ('User ID', 'Device Name', 'Last Modified','Is Corrupted', 'Device Data')
 
             report.write_artifact_data_table(data_headers, linked_devices, file_path)
             report.end_artifact_report()
 
-            tsvname = f'Passkeys - registry'
+            tsvname = f'Passkeys - Registry'
 
             report_folder = os.path.join(report_folder, "passkeys") + '\\'
             tsv(report_folder, data_headers, linked_devices, tsvname)

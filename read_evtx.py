@@ -148,8 +148,8 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, star
 
         if output_format == 'csv':
             data_headers = (
-                'userId', 'transaction_id', 'type', 'browser', 'browserPath', 'website', 'timestamp', 'computerName',
-                'device', 'result')
+                'User ID', 'Transaction ID', 'Type', 'Browser', 'Browser Path', 'Website', 'Timestamp', 'Computer Name', \
+                'Device', 'Result')
             event_list.insert(0, data_headers)
             own_functions.write_csv(os.path.join(report_folder, 'passkey_logs.csv'), event_list)
             print('---Sucesso, foram registadas ' + str(len(event_list)) + ' operações Passkey---')
@@ -161,8 +161,8 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, star
                 report.start_artifact_report(report_folder, 'Passkeys - Event Log')
                 report.add_script()
                 data_headers = (
-                'userId', 'transaction_id', 'type', 'browser', 'browserPath', 'website', 'timestamp', 'computerName',
-                'device', 'result')
+                'User ID', 'Transaction ID', 'Type', 'Browser', 'Browser Path', 'Website', 'Timestamp', 'Computer Name', \
+                'Device', 'Result')
 
                 report.write_artifact_data_table(data_headers, event_list, file_path)
                 report.end_artifact_report()

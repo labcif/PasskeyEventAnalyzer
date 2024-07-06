@@ -1,7 +1,7 @@
 import argparse
 import read_evtx
 import read_registry
-from scripts.ilapfuncs import logfunc, OutputParameters, logdevinfo, logfunc
+from scripts.ilapfuncs import logfunc, OutputParameters, logfunc
 from time import process_time, gmtime, strftime
 from scripts.report import generate_report
 import os
@@ -20,16 +20,9 @@ def main(data):
         output_folder = os.getcwd()
 
     out_params = OutputParameters(output_folder)
-    input_path = ''  # TODO
+    input_path = 'N\A'  # TODO
 
-    # ======================= Prepare Output Folder =======================
-
-    logdevinfo()
     logfunc()
-
-    log = open(os.path.join(out_params.report_folder_base, 'Script Logs', 'ProcessedFilesLog.html'), 'w+', encoding='utf8')
-    nl = '\n'  # literal in order to have new lines in fstrings that create text files
-    log.write(f'Extraction/Path selected: {input_path}<br><br>')
 
     # ======================= File Processing =======================
 

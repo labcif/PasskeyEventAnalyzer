@@ -200,8 +200,8 @@ thank_you_note = \
                                 <h5 class="card-title">ESTG - IPLeiria</h5>
                                 <p class="card-text">
                                     Computer Engineering Project 
-                                    <br/>
                                 </p>
+                                <br/>
                                 <!--Github-->
                                 <a class="btn-floating btn-git" type="button" role="button" href="https://github.com/labcif/PasskeyEventAnalyzer" target="_blank"><i class="fab fa-github"></i>PEA Project Home </a>
                             </div>
