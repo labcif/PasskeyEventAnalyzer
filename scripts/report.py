@@ -2,13 +2,12 @@ import html
 import os
 import pathlib
 import shutil
-import sqlite3
 import sys
 
 from collections import OrderedDict
 from scripts.html_parts import *
 from scripts.ilapfuncs import logfunc
-from scripts.version_info import wleapp_version, wleapp_contributors
+from scripts.version_info import pea_version, pea_contributors
 
 def get_icon_name(category, artifact):
     ''' Returns the icon name from the feathericons collection. To add an icon type for 
@@ -84,7 +83,7 @@ def get_icon_name(category, artifact):
     
     '''
     '''
-def generate_report(reportfolderbase, time_in_secs, time_HMS, extraction_type, image_input_path):
+def generate_report(reportfolderbase, time_in_secs, time_HMS, image_input_path):
 
     control = None
     side_heading = \
@@ -154,7 +153,7 @@ def generate_report(reportfolderbase, time_in_secs, time_HMS, extraction_type, i
                 pass # Perhaps it was not empty!
 
     # Create index.html's page content
-    create_index_html(reportfolderbase, time_in_secs, time_HMS, extraction_type, image_input_path, nav_list_data)
+    create_index_html(reportfolderbase, time_in_secs, time_HMS, image_input_path, nav_list_data)
     elements_folder = os.path.join(reportfolderbase, '_elements')
     os.mkdir(elements_folder)
     __location__ = os.path.dirname(os.path.abspath(__file__))
@@ -172,7 +171,7 @@ def get_file_content(path):
     f.close()
     return data
 
-def create_index_html(reportfolderbase, time_in_secs, time_HMS, extraction_type, image_input_path, nav_list_data):
+def create_index_html(reportfolderbase, time_in_secs, time_HMS, image_input_path, nav_list_data):
     '''Write out the index.html page to the report folder'''
     content = '<br />'
     content += """
@@ -181,7 +180,6 @@ def create_index_html(reportfolderbase, time_in_secs, time_HMS, extraction_type,
     """ # CARD start
     
     case_list = [   ['Extraction location', image_input_path],
-                    ['Extraction type', extraction_type],
                     ['Report directory', reportfolderbase],
                     ['Processing time', f'{time_HMS} (Total {time_in_secs} seconds)']  ]
 
@@ -190,36 +188,28 @@ def create_index_html(reportfolderbase, time_in_secs, time_HMS, extraction_type,
                     All dates and times are in UTC unless noted otherwise!
                 </p>
     """
-
+    
     # Get script run log (this will be tab2)
-    devinfo_files_path = os.path.join(reportfolderbase, 'Script Logs', 'DeviceInfo.html')
-    tab2_content = get_file_content(devinfo_files_path)
-    
-    # Get script run log (this will be tab3)
     script_log_path = os.path.join(reportfolderbase, 'Script Logs', 'Screen Output.html')
-    tab3_content = get_file_content(script_log_path)
+    tab2_content = get_file_content(script_log_path)
     
-    # Get processed files list (this will be tab3)
-    processed_files_path = os.path.join(reportfolderbase, 'Script Logs', 'ProcessedFilesLog.html')
-    tab4_content = get_file_content(processed_files_path)
-    
-    content += tabs_code.format(tab1_content, tab2_content, tab3_content, tab4_content)
+    content += tabs_code.format(tab1_content, tab2_content)
     
     content += '</div>' # CARD end
 
-    authors_data = generate_authors_table_code(wleapp_contributors)
+    authors_data = generate_authors_table_code(pea_contributors)
     credits_code = credits_block.format(authors_data)
 
     # WRITE INDEX.HTML LAST
     filename = 'index.html'
-    page_title = 'Passkeys Forensics Report'
+    page_title = 'Passkey Event Analyzer Report'
     body_heading = 'Windows Passkeys artifacts Parser'
-    body_description = 'Adapted from WLEAPP html report'
+    body_description = 'This report was adapted from WLEAPP html report'
     active_nav_list_data = mark_item_active(nav_list_data, filename) + nav_bar_script
 
     f = open(os.path.join(reportfolderbase, filename), 'w', encoding='utf8')
     f.write(page_header.format(page_title))
-    f.write(body_start.format(f"Passkeys Forensics {wleapp_version}"))
+    f.write(body_start.format(f"Passkey Event Analyzer {pea_version}"))
     f.write(body_sidebar_setup + active_nav_list_data + body_sidebar_trailer)
     f.write(body_main_header + body_main_data_title.format(body_heading, body_description))
     f.write(content)
@@ -228,9 +218,9 @@ def create_index_html(reportfolderbase, time_in_secs, time_HMS, extraction_type,
     f.write(body_main_trailer + body_end + nav_bar_script_footer + page_footer)
     f.close()
 
-def generate_authors_table_code(wleapp_contributors):
+def generate_authors_table_code(pea_contributors):
     authors_data = ''
-    for author_name, blog, tweet_handle, git in wleapp_contributors:
+    for author_name, blog, tweet_handle, git in pea_contributors:
         author_data = ''
         if blog:
             author_data += f'<a href="{blog}" target="_blank">{blog_icon}</a> &nbsp;\n'

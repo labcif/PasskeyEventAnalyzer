@@ -1,9 +1,7 @@
 import argparse
 import read_evtx
 import read_registry
-from utils import functions as own_functions
-from scripts.ilapfuncs import logfunc, tsv, timeline, is_platform_windows, \
-    OutputParameters, logdevinfo, logfunc
+from scripts.ilapfuncs import logfunc, OutputParameters, logdevinfo, logfunc
 from time import process_time, gmtime, strftime
 from scripts.report import generate_report
 import os
@@ -29,8 +27,7 @@ def main(data):
     logdevinfo()
     logfunc()
 
-    log = open(os.path.join(out_params.report_folder_base, 'Script Logs', 'ProcessedFilesLog.html'), 'w+',
-               encoding='utf8')
+    log = open(os.path.join(out_params.report_folder_base, 'Script Logs', 'ProcessedFilesLog.html'), 'w+', encoding='utf8')
     nl = '\n'  # literal in order to have new lines in fstrings that create text files
     log.write(f'Extraction/Path selected: {input_path}<br><br>')
 
@@ -54,7 +51,7 @@ def main(data):
 
     print(f'Tempo decorrido: {run_time_HMS}')
 
-    generate_report(out_params.report_folder_base, run_time_secs, run_time_HMS, 'fs', input_path)
+    generate_report(out_params.report_folder_base, run_time_secs, run_time_HMS, input_path)
 
 
 

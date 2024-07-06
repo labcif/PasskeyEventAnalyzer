@@ -176,20 +176,12 @@ tabs_code = \
             <a class="nav-link active" id="case-tab" data-toggle="tab" href="#case" role="tab" aria-controls="case" aria-selected="true">Details</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="device-list-tab" data-toggle="tab" href="#device" role="tab" aria-controls="device" aria-selected="false">Device details</a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link" id="run-log-tab" data-toggle="tab" href="#run" role="tab" aria-controls="run" aria-selected="false">Script run log</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="files-list-tab" data-toggle="tab" href="#files" role="tab" aria-controls="files" aria-selected="false">Processed files list</a>
         </li>
     </ul>
     <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="case" role="tabpanel" aria-labelledby="case-tab"><br />{}</div>
-        <div class="tab-pane fade" id="device" role="tabpanel" aria-labelledby="device-tab"><br />{}</div>
         <div class="tab-pane fade text-monospace" id="run" role="tabpanel" aria-labelledby="script-run-tab"><br />{}</div>
-        <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="profile-tab"><br />{}</div>
     </div>
 """
 # thank you note , at bottom of index.html
@@ -205,13 +197,13 @@ thank_you_note = \
                             </div>
                             <div class="col-md-8">
                             <div class="card-body">
-                                <h5 class="card-title">Adapted from WLEAPP html report</h5>
+                                <h5 class="card-title">ESTG - IPLeiria</h5>
                                 <p class="card-text">
-                                    This report was generated using WLEAPP, a tool developed by the WLEAPP team.
+                                    Computer Engineering Project 
+                                    <br/>
                                 </p>
                                 <!--Github-->
-                                <a class="btn-floating btn-git" type="button" role="button" href="https://github.com/abrignoni/wleapp" target="_blank"><i class="fab fa-github"></i>WLEAPP Project Home </a>
-                                <p class="card-text fadeIn"><small class="text-muted">WLEAPP Team</small></p>
+                                <a class="btn-floating btn-git" type="button" role="button" href="https://github.com/labcif/PasskeyEventAnalyzer" target="_blank"><i class="fab fa-github"></i>PEA Project Home </a>
                             </div>
                             </div>
                         </div>
@@ -225,7 +217,7 @@ thank_you_note = \
 credits_block = \
 """
     <div class="alert alert-light mb-4 bg-white" style="border-style: none">
-        <h4 class="text-center">WLEAPP contributors</h4>
+        <h4 class="text-center">PEA contributors</h4>
         <ul class="list-group" style="max-width: 500px; margin:auto">
             {}
         </ul>

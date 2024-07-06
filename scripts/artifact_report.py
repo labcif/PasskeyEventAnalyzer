@@ -2,7 +2,7 @@ import html
 import os
 from scripts.html_parts import *
 from scripts.ilapfuncs import is_platform_windows
-from scripts.version_info import wleapp_version
+from scripts.version_info import pea_version
 
 class ArtifactHtmlReport:
 
@@ -21,8 +21,8 @@ class ArtifactHtmlReport:
         '''Creates the report HTML file and writes the artifact name as a heading'''
         self.report_file_path = os.path.join(os.path.split(report_folder.rstrip('\\'))[0], f'{artifact_file_name}.html')
         self.report_file = open(os.path.join(report_folder, f'{artifact_file_name}.temphtml'), 'w', encoding='utf8')
-        self.report_file.write(page_header.format(f'WLEAPP - {self.artifact_name} report'))
-        self.report_file.write(body_start.format(f'WLEAPP {wleapp_version}'))
+        self.report_file.write(page_header.format(f'Passkey Event Analyzer - {self.artifact_name} report'))
+        self.report_file.write(body_start.format(f'Passkey Event Analyzer {pea_version}'))
         self.report_file.write(body_sidebar_setup)
         self.report_file.write(body_sidebar_dynamic_data_placeholder) # placeholder for sidebar data
         self.report_file.write(body_sidebar_trailer)
