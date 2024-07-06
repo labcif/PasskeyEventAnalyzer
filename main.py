@@ -7,11 +7,14 @@ from scripts.ilapfuncs import logfunc, tsv, timeline, is_platform_windows, \
 from time import process_time, gmtime, strftime
 from scripts.report import generate_report
 import os
+import datetime
 
 
 def main(data):
     start = process_time()
 
+    startdate = data.startdate
+    enddate = data.enddate
     output_format = data.format
 
     output_folder = data.output
@@ -36,7 +39,7 @@ def main(data):
     print('- ANALISADOR FORENSE PASSKEYS - ', strftime("%d/%m/%Y %H:%M:%S"))
     if data.eventlog:
         # print(f"Event Log: {data.eventlog}")
-        read_evtx.read_evtx_file(data.eventlog, out_params.report_folder_base, input_path, output_format)
+        read_evtx.read_evtx_file(data.eventlog, out_params.report_folder_base, input_path, output_format, startdate, enddate)
 
     if data.registry:
         # print(f"Registry: {data.registry}")
@@ -49,21 +52,32 @@ def main(data):
     run_time_secs = end - start
     run_time_HMS = strftime('%H:%M:%S', gmtime(run_time_secs))
 
+    print(f'Tempo decorrido: {run_time_HMS}')
+
     generate_report(out_params.report_folder_base, run_time_secs, run_time_HMS, 'fs', input_path)
+
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog='passkey-forensics-W11',
+        prog='PEA',
         description='''
-            Passkey Forensics W11 is a tool to extract and 
+            Passkey Event Analyzer is a tool to extract and 
             analyze FIDO2 keys from Windows Event Logs and Registry''',
         epilog='Developed by: Pedro Chen and Bruno Correia')
+    
+    parser.add_argument(
+        "-p",
+        "--searchpath",
+        help="Path to search for event log and registry files",
+        required=False,
+        default=None,
+        type=str)
 
     parser.add_argument(
-        "-e",
+        "-l",
         "--eventlog",
-        help="Path with event log file",
+        help="Event log file, or path with event log file",
         required=False,
         default=None,
         type=str)
@@ -71,10 +85,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "-r",
         "--registry",
-        help="Path with registry file",
+        help="Registry file, or path with registry file",
         required=False,
         default=None,
         type=str)
+    
+    parser.add_argument(
+        "-s",
+        "--startdate",
+        help="Start date filter of the event log (ISOformat - YYYY-MM-DD:HH:mm:ss)",
+        required=False,
+        default=None,
+        type=datetime.datetime.fromisoformat
+    )
+
+    parser.add_argument(
+        "-e",
+        "--enddate",
+        help="End date filter of the event log (ISOformat - YYYY-MM-DD:HH:mm:ss)",
+        required=False,
+        default=None,
+        type=datetime.datetime.fromisoformat
+    )
 
     parser.add_argument(
         "-o",
@@ -94,4 +126,14 @@ if __name__ == "__main__":
         choices=['csv', 'html'])
 
     args = parser.parse_args()
+
+    if args.searchpath is None and args.eventlog is None and args.registry is None:
+        parser.error("at least one of the following arguments must be provided: -s/--searchpath, -l/--eventlog, -r/--registry")
+
+    if args.searchpath is not None:
+        print("-s/--searchpath argument is provided, the arguments -l/--eventlog, -r/--registry will be ignored")
+
+        if not os.path.exists(args.searchpath):
+            parser.error(f"the path {args.searchpath} does not exist")
+    
     main(args)

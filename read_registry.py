@@ -14,42 +14,51 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
     fido_list = {}
     linked_devices = []  # [[<user_id>, <device_name>, <last_modified>, <isCorrupted>, <device_data>], ...]
     print('---A analizar o ficheiro registry fornecido---')
-    for sk in reg.get_key(SEARCH_PATH).iter_subkeys():
-        fido_list[sk.name] = None
 
-    for fido_sk in fido_list:
-        device_list = {}
+    try:
+        for sk in reg.get_key(SEARCH_PATH).iter_subkeys():
+            fido_list[sk.name] = None
 
-        path = SEARCH_PATH
-        path += f'\\' + str(fido_sk) + rf'\LinkedDevices'
-        for device_sk in reg.get_key(path).iter_subkeys():
-            device_list[device_sk.name] = None
-
-        fido_list[fido_sk] = device_list.copy()
-
-    for fido in fido_list:
-        # print(fido)  # User ID
-        linked_device = [fido, None, None, None, None]  # [<user_id>, <device_name>, <last_modified>, <is_corrupted>, <device_data>]
-
-        for device in fido_list[fido]:
+        for fido_sk in fido_list:
+            device_list = {}
 
             path = SEARCH_PATH
-            path += f'\\' + str(fido) + rf'\LinkedDevices'
-            path += f'\\' + str(device)
-            data = reg.get_key(path)
+            path += f'\\' + str(fido_sk) + rf'\LinkedDevices'
+            for device_sk in reg.get_key(path).iter_subkeys():
+                device_list[device_sk.name] = None
 
-            for i in data.get_values():
-                # print("\t\t" + str(i))
-                if i.name == "Name":
-                    linked_device[1] = i.value
-                    print('Dispositivo encontrado: ', i.value)
-                if i.name == "Data" and i.value_type == 'REG_BINARY':
-                    linked_device[4] = i.value.hex().upper()
-                linked_device[3] = i.is_corrupted
+            fido_list[fido_sk] = device_list.copy()
+    except:
+        print('---Não foram encontrados dispositivos associados---')
+        return
 
-            linked_device[2] = convert_wintime(data.header.last_modified, as_json=False)
+    try:
+        for fido in fido_list:
+            # print(fido)  # User ID
+            linked_device = [fido, None, None, None, None]  # [<user_id>, <device_name>, <last_modified>, <is_corrupted>, <device_data>]
 
-            linked_devices.append(linked_device.copy())
+            for device in fido_list[fido]:
+
+                path = SEARCH_PATH
+                path += f'\\' + str(fido) + rf'\LinkedDevices'
+                path += f'\\' + str(device)
+                data = reg.get_key(path)
+
+                for i in data.get_values():
+                    # print("\t\t" + str(i))
+                    if i.name == "Name":
+                        linked_device[1] = i.value
+                        print('Dispositivo encontrado: ', i.value)
+                    if i.name == "Data" and i.value_type == 'REG_BINARY':
+                        linked_device[4] = i.value.hex().upper()
+                    linked_device[3] = i.is_corrupted
+
+                linked_device[2] = convert_wintime(data.header.last_modified, as_json=False)
+
+                linked_devices.append(linked_device.copy())
+    except:
+        print('---Erro na extração dos dados---')
+        return  
 
     if output_format == 'csv':
         print('---Sucesso, foram encontrados ' + str(len(linked_devices)) + ' dispositivos associados---')

@@ -56,12 +56,17 @@ def object_to_row(event):
             event.website, event.timestamp, event.computerName, event.device, event.result]
 
 
-def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
+def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, start_date=None, end_date=None):
     event_list = []
     print("---A iniciar a leitura do ficheiro evtx---")
     with Evtx(evtx_file_path) as evtx:
+        event = None
         for record in evtx.records():
 
+            if start_date and record.timestamp() < start_date:
+                continue
+            if end_date and record.timestamp() > end_date and event:
+                continue
 
             soup = BeautifulSoup(record.xml(), 'xml')
 
@@ -80,6 +85,8 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
             # 1007: Success Ctap Cmd            #
             # 1008: Connection failed           #
             #####################################
+
+            
 
             if event_id in ["1000", "1003"]:
                 event = PasskeyLog()
@@ -102,18 +109,20 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format):
 
                 event.set_event_type("Authentication" if event_id == "1003" else "Registration")
                 print('Operação encontrada: Tipo ', event.type, ' no dia ',  event.timestamp.strftime("%d de %B"))
-            elif event_id in ["1001", "1004"]:
+            elif event and event_id in ["1001", "1004"]:
                 event.set_event_conclusion("Success")
                 event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
                                    event.website, event.timestamp, event.computerName, event.device, event.result))
+                event = None
                 continue
-            elif event_id in ["1002", "1005"]:
+            elif event and event_id in ["1002", "1005"]:
                 event.set_event_conclusion("Incomplete")
                 event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
                                    event.website, event.timestamp, event.computerName, event.device, event.result))
+                event = None
                 continue
 
-            if event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103":
+            if event and (event_id == "2104" or event_id == "2106" or event_id == "1101" or event_id == "1103"):
                 event_data = soup.find("EventData")
 
                 if event_data:
