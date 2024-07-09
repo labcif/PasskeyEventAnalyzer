@@ -58,7 +58,7 @@ def object_to_row(event):
 
 def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None, end_date=None):
     event_list = []
-    print("---A iniciar a leitura do ficheiro evtx---")
+    logfunc("---Analyzing EVTX file---")
     with Evtx(evtx_file_path) as evtx:
         event = None
         for record in evtx.records():
@@ -108,7 +108,7 @@ def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None
                     event.set_user_id(user_id)
 
                 event.set_event_type("Authentication" if event_id == "1003" else "Registration")
-                print('Operação encontrada: Tipo ', event.type, ' no dia ',  event.timestamp)
+                print('Operation detected: Type: ', event.type, ' Day: ',  event.timestamp)
             elif event and event_id in ["1001", "1004"]:
                 event.set_event_conclusion("Success")
                 event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
@@ -139,10 +139,11 @@ def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None
                                 event.set_browser_path(data_value.text)
                                 event.set_browser(os.path.splitext(os.path.basename(event.browserPath))[0].capitalize())
 
-                    if device and device.text:
-                        event.set_device(device.text)
-                    else:
-                        event.set_device(computer_name.text + ' (This Device)')
+                    if device:
+                        if device.text:
+                            event.set_device(device.text)
+                        else:
+                            event.set_device(computer_name.text + ' (This Device)')
 
         data_headers = (
                 'User ID', 'Transaction ID', 'Type', 'Browser', 'Browser Path', 'Website', 'Timestamp', \
@@ -151,7 +152,7 @@ def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None
         if output_format == 'csv':
             event_list.insert(0, data_headers)
             own_functions.write_csv(os.path.join(report_folder, 'passkey_logs.csv'), event_list)
-            print('---Sucesso, foram registadas ' + str(len(event_list)) + ' operações Passkey---')
+            logfunc('---Sucess, ' + str(len(event_list)) + ' Passkey operations registered---')
 
 
         elif output_format == 'html':
@@ -167,13 +168,13 @@ def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None
 
                 report_folder = os.path.join(report_folder, "passkeys") + '\\'
                 tsv(report_folder, data_headers, event_list, tsvname)
-                print('---Sucesso, foram registadas ' + str(len(event_list)) + ' operações Passkey---')
+                logfunc('---Sucess, ' + str(len(event_list)) + ' Passkey operations ---')
             else:
                 logfunc('Passkeys - Event Log data available')
 
         elif output_format == 'xlsx':
             event_list.insert(0, data_headers)
             own_functions.write_excel(os.path.join(report_folder, 'passkeys_artifacts_data.xlsx'), 'Passkey Logs', event_list, is_rewrite=False)
-            print('---Sucesso, foram registadas ' + str(len(event_list)) + ' operações Passkey---')
+            logfunc('---Sucess, ' + str(len(event_list)) + ' Passkey operations ---')
 
 

@@ -22,6 +22,7 @@ def main(data):
     enddate = data.enddate
     search_path = data.searchpath
     output_format = data.format
+    output_folder = data.output
 
     if output_folder:
         output_folder = os.path.abspath(data.output)
