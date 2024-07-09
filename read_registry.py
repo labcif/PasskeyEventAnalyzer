@@ -9,7 +9,7 @@ from utils import functions as own_functions
 SEARCH_PATH = fr"S-1-5-20\Software\Microsoft\Cryptography\FIDO"
 
 
-def read_registry_file(registry_file_path, report_folder, file_path, output_format):
+def read_registry_file(registry_file_path, report_folder, output_format):
 
     reg = RegistryHive(registry_file_path)
     fido_list = {}

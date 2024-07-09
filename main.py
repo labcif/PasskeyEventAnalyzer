@@ -22,9 +22,10 @@ def main(data):
     enddate = data.enddate
     search_path = data.searchpath
     output_format = data.format
-    output_folder = os.path.abspath(data.output)
 
-    if not output_folder:
+    if output_folder:
+        output_folder = os.path.abspath(data.output)
+    else:
         output_folder = os.getcwd()
 
     out_params = OutputParameters(output_folder, output_format)
@@ -71,10 +72,10 @@ def main(data):
 
     print('- ANALISADOR FORENSE PASSKEYS - ', strftime("%d/%m/%Y %H:%M:%S"))
     if data.eventlog:
-        read_evtx.read_evtx_file(eventlog_file, out_params.report_folder_base, input_path, output_format, startdate, enddate)
+        read_evtx.read_evtx_file(eventlog_file, out_params.report_folder_base, output_format, startdate, enddate)
 
     if data.registry:
-        read_registry.read_registry_file(registry_file, out_params.report_folder_base, input_path, output_format)
+        read_registry.read_registry_file(registry_file, out_params.report_folder_base, output_format)
 
     print('TERMINADO - para mais detalhes consulte os resultados na pasta de output.')
     # ======================= Terminate Report =======================

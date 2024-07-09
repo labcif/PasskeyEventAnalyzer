@@ -56,7 +56,7 @@ def object_to_row(event):
             event.website, event.timestamp, event.computerName, event.device, event.result]
 
 
-def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, start_date=None, end_date=None):
+def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None, end_date=None):
     event_list = []
     print("---A iniciar a leitura do ficheiro evtx---")
     with Evtx(evtx_file_path) as evtx:
