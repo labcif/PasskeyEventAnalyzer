@@ -29,9 +29,10 @@ def main(data):
         output_folder = os.getcwd()
 
     out_params = OutputParameters(output_folder, output_format)
+    logfunc()
     input_path = 'N\A'  # TODO
 
-    logfunc()
+  
 
     terminate = [False, False] # flag to terminate if no files are found
 
