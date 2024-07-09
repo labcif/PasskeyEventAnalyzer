@@ -160,7 +160,7 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, star
                 report.start_artifact_report(report_folder, 'Passkeys - Event Log')
                 report.add_script()
 
-                report.write_artifact_data_table(data_headers, event_list, file_path)
+                report.write_artifact_data_table(data_headers, event_list, evtx_file_path)
                 report.end_artifact_report()
 
                 tsvname = f'Passkeys - Event Log'

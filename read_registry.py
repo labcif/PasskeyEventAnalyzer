@@ -76,7 +76,7 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
             report.start_artifact_report(report_folder, 'Passkeys - Registry')
             report.add_script()
 
-            report.write_artifact_data_table(data_headers, linked_devices, file_path)
+            report.write_artifact_data_table(data_headers, linked_devices, registry_file_path)
             report.end_artifact_report()
 
             tsvname = f'Passkeys - Registry'

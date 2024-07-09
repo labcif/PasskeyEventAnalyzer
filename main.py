@@ -51,7 +51,6 @@ def main(data):
                 eventlog_file = os.path.join(eventlog_file, EVTX_FILE)
                 if not os.path.exists(eventlog_file):
                     logfunc(f'ERROR: File {EVTX_FILE} not found.')
-                    print(f'ERROR: File {EVTX_FILE} not found.')
                     terminate[0] = True
 
         registry_file = data.registry
@@ -61,12 +60,10 @@ def main(data):
                 registry_file = os.path.join(registry_file, REGISTRY_FILE)
                 if not os.path.exists(registry_file):
                     logfunc(f'ERROR: File {REGISTRY_FILE} not found.')
-                    print(f'ERROR: File {REGISTRY_FILE} not found.')
                     terminate[1] = True
         
     if all(terminate):
         logfunc(f'ERROR: No files to process, terminating.')
-        print(f'ERROR: No files to process, terminating.')
         return
     
 
