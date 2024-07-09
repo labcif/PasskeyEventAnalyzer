@@ -2,3 +2,5 @@ regipy
 python-evtx
 beautifulsoup4
 lxml
+pandas
+openpyxl

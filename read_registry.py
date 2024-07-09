@@ -5,7 +5,7 @@ from scripts.ilapfuncs import logfunc, tsv
 import os
 from utils import functions as own_functions
 
-FILE_PATH = fr"windows-registry\2024-03-28_00.00\NTUSER.DAT"
+
 SEARCH_PATH = fr"S-1-5-20\Software\Microsoft\Cryptography\FIDO"
 
 
@@ -54,16 +54,17 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
                         linked_device[4] = i.value.hex().upper()
                     linked_device[3] = i.is_corrupted
 
-                linked_device[2] = convert_wintime(data.header.last_modified, as_json=False)
+                linked_device[2] = convert_wintime(data.header.last_modified, as_json=False).strftime("%Y-%m-%d %H:%M:%S")
 
                 linked_devices.append(linked_device.copy())
     except:
         print('---Erro na extração dos dados---')
         return  
+    
+    data_headers = ('User ID', 'Device Name', 'Last Modified','Is Corrupted', 'Device Data')
 
     if output_format == 'csv':
         print('---Sucesso, foram encontrados ' + str(len(linked_devices)) + ' dispositivos associados---')
-        data_headers = ('User ID', 'Device Name', 'Device Data', 'Last Modified', 'Is Corrupted')
         linked_devices.insert(0, data_headers)
         own_functions.write_csv(os.path.join(report_folder, 'linked_devices.csv'), linked_devices)
 
@@ -74,7 +75,6 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
             report = ArtifactHtmlReport('Passkeys - Registry')
             report.start_artifact_report(report_folder, 'Passkeys - Registry')
             report.add_script()
-            data_headers = ('User ID', 'Device Name', 'Last Modified','Is Corrupted', 'Device Data')
 
             report.write_artifact_data_table(data_headers, linked_devices, file_path)
             report.end_artifact_report()
@@ -85,7 +85,10 @@ def read_registry_file(registry_file_path, report_folder, file_path, output_form
             tsv(report_folder, data_headers, linked_devices, tsvname)
         else:
             logfunc('Passkeys - registry data available')
+    
+    elif output_format == 'xlsx':
+        print('---Sucesso, foram encontrados ' + str(len(linked_devices)) + ' dispositivos associados---')
+        linked_devices.insert(0, data_headers)
+        own_functions.write_excel(os.path.join(report_folder, 'passkeys_artifacts_data.xlsx'), 'Linked Devices', linked_devices, is_rewrite=False)
 
 
-if __name__ == '__main__':
-    read_registry_file(FILE_PATH, None, None, None)

@@ -6,6 +6,13 @@ from time import process_time, gmtime, strftime
 from scripts.report import generate_report
 import os
 import datetime
+from utils import functions as own_functions
+
+
+REGISTRY_FILE = 'NTUSER.DAT'
+EVTX_FILE = 'Microsoft-Windows-WebAuthN%4Operational.evtx'
+SEARCH_FILES = ['*/Windows/System32/winevt/Logs/Microsoft-Windows-WebAuthN%4Operational.evtx', \
+                '*/Windows/ServiceProfiles/NetworkService/NTUSER.DAT']
 
 
 def main(data):
@@ -13,27 +20,64 @@ def main(data):
 
     startdate = data.startdate
     enddate = data.enddate
+    search_path = data.searchpath
     output_format = data.format
+    output_folder = os.path.abspath(data.output)
 
-    output_folder = data.output
     if not output_folder:
         output_folder = os.getcwd()
 
-    out_params = OutputParameters(output_folder)
+    out_params = OutputParameters(output_folder, output_format)
     input_path = 'N\A'  # TODO
 
     logfunc()
+
+    terminate = [False, False] # flag to terminate if no files are found
+
+    if search_path:
+        search_path = os.path.abspath(search_path)
+        exit()
+        file = own_functions.search_file(SEARCH_FILES[0], search_path, True)
+        print(file)
+        exit()
+
+
+
+    else:
+        eventlog_file = data.eventlog
+        if eventlog_file:
+            eventlog_file = os.path.abspath(data.eventlog)
+            if os.path.isdir(eventlog_file):
+                eventlog_file = os.path.join(eventlog_file, EVTX_FILE)
+                if not os.path.exists(eventlog_file):
+                    logfunc(f'ERROR: File {EVTX_FILE} not found.')
+                    print(f'ERROR: File {EVTX_FILE} not found.')
+                    terminate[0] = True
+
+        registry_file = data.registry
+        if registry_file:
+            registry_file = os.path.abspath(data.registry)
+            if os.path.isdir(registry_file):
+                registry_file = os.path.join(registry_file, REGISTRY_FILE)
+                if not os.path.exists(registry_file):
+                    logfunc(f'ERROR: File {REGISTRY_FILE} not found.')
+                    print(f'ERROR: File {REGISTRY_FILE} not found.')
+                    terminate[1] = True
+        
+    if all(terminate):
+        logfunc(f'ERROR: No files to process, terminating.')
+        print(f'ERROR: No files to process, terminating.')
+        return
+    
 
     # ======================= File Processing =======================
 
     print('- ANALISADOR FORENSE PASSKEYS - ', strftime("%d/%m/%Y %H:%M:%S"))
     if data.eventlog:
-        # print(f"Event Log: {data.eventlog}")
-        read_evtx.read_evtx_file(data.eventlog, out_params.report_folder_base, input_path, output_format, startdate, enddate)
+        read_evtx.read_evtx_file(eventlog_file, out_params.report_folder_base, input_path, output_format, startdate, enddate)
 
     if data.registry:
-        # print(f"Registry: {data.registry}")
-        read_registry.read_registry_file(data.registry, out_params.report_folder_base, input_path, output_format)
+        read_registry.read_registry_file(registry_file, out_params.report_folder_base, input_path, output_format)
 
     print('TERMINADO - para mais detalhes consulte os resultados na pasta de output.')
     # ======================= Terminate Report =======================
@@ -44,8 +88,8 @@ def main(data):
 
     print(f'Tempo decorrido: {run_time_HMS}')
 
-    generate_report(out_params.report_folder_base, run_time_secs, run_time_HMS, input_path)
-
+    if output_format == 'html':
+        generate_report(out_params.report_folder_base, run_time_secs, run_time_HMS, input_path)
 
 
 if __name__ == "__main__":
@@ -113,17 +157,30 @@ if __name__ == "__main__":
         required=True,
         default=None,
         type=str,
-        choices=['csv', 'html'])
+        choices=['csv', 'html', 'xlsx'])
 
     args = parser.parse_args()
+
+    # argument validation
 
     if args.searchpath is None and args.eventlog is None and args.registry is None:
         parser.error("at least one of the following arguments must be provided: -s/--searchpath, -l/--eventlog, -r/--registry")
 
     if args.searchpath is not None:
-        print("-s/--searchpath argument is provided, the arguments -l/--eventlog, -r/--registry will be ignored")
+        print("-s/--searchpath argument was provided, the arguments -l/--eventlog, -r/--registry will be ignored")
 
-        if not os.path.exists(args.searchpath):
+        if not os.path.exists(args.searchpath): # check if the path exists
             parser.error(f"the path {args.searchpath} does not exist")
+
+        if not os.path.isdir(args.searchpath): # check if the path is a directory
+            parser.error(f"the path {args.searchpath} does not a directory")
     
+    if args.eventlog is not None:
+        if not os.path.exists(args.eventlog):
+            parser.error(f"the file {args.eventlog} does not exist")
+
+    if args.registry is not None:
+        if not os.path.exists(args.registry):
+            parser.error(f"the file {args.registry} does not exist")
+
     main(args)

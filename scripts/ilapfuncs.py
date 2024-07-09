@@ -16,15 +16,16 @@ class OutputParameters:
     nl = '\n'
     screen_output_file_path = ''
     
-    def __init__(self, output_folder):
+    def __init__(self, output_folder, output_format='html'):
         now = datetime.datetime.now()
         currenttime = str(now.strftime('%Y-%m-%d_%A_%H%M%S'))
         self.report_folder_base = os.path.join(output_folder, 'Passkeys_Reports_' + currenttime) # aleapp , aleappGUI, ileap_artifacts, report.py
-        self.temp_folder = os.path.join(self.report_folder_base, 'temp')
+        os.makedirs(os.path.join(self.report_folder_base, 'Script Logs'))
+        
         OutputParameters.screen_output_file_path = os.path.join(self.report_folder_base, 'Script Logs', 'Screen Output.html')
 
-        os.makedirs(os.path.join(self.report_folder_base, 'Script Logs'))
-        os.makedirs(self.temp_folder)
+            
+
 
 def is_platform_windows():
     '''Returns True if running on Windows'''

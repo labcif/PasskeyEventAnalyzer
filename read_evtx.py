@@ -95,7 +95,7 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, star
                 if transaction_id:
                     event.set_transaction_id(transaction_id.text)
 
-                event.set_timestamp(record.timestamp())
+                event.set_timestamp(record.timestamp().strftime("%Y-%m-%d %H:%M:%S"))
 
                 computer_name = soup.find("System")
                 computer_name = computer_name.find("Computer")
@@ -108,7 +108,7 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, star
                     event.set_user_id(user_id)
 
                 event.set_event_type("Authentication" if event_id == "1003" else "Registration")
-                print('Operação encontrada: Tipo ', event.type, ' no dia ',  event.timestamp.strftime("%d de %B"))
+                print('Operação encontrada: Tipo ', event.type, ' no dia ',  event.timestamp)
             elif event and event_id in ["1001", "1004"]:
                 event.set_event_conclusion("Success")
                 event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
@@ -144,12 +144,11 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, star
                     else:
                         event.set_device(computer_name.text + ' (This Device)')
 
-
+        data_headers = (
+                'User ID', 'Transaction ID', 'Type', 'Browser', 'Browser Path', 'Website', 'Timestamp', \
+                'Computer Name', 'Device', 'Result')
 
         if output_format == 'csv':
-            data_headers = (
-                'User ID', 'Transaction ID', 'Type', 'Browser', 'Browser Path', 'Website', 'Timestamp', 'Computer Name', \
-                'Device', 'Result')
             event_list.insert(0, data_headers)
             own_functions.write_csv(os.path.join(report_folder, 'passkey_logs.csv'), event_list)
             print('---Sucesso, foram registadas ' + str(len(event_list)) + ' operações Passkey---')
@@ -160,9 +159,6 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, star
                 report = ArtifactHtmlReport('Passkeys - Event Log')
                 report.start_artifact_report(report_folder, 'Passkeys - Event Log')
                 report.add_script()
-                data_headers = (
-                'User ID', 'Transaction ID', 'Type', 'Browser', 'Browser Path', 'Website', 'Timestamp', 'Computer Name', \
-                'Device', 'Result')
 
                 report.write_artifact_data_table(data_headers, event_list, file_path)
                 report.end_artifact_report()
@@ -175,17 +171,9 @@ def read_evtx_file(evtx_file_path, report_folder, file_path, output_format, star
             else:
                 logfunc('Passkeys - Event Log data available')
 
+        elif output_format == 'xlsx':
+            event_list.insert(0, data_headers)
+            own_functions.write_excel(os.path.join(report_folder, 'passkeys_artifacts_data.xlsx'), 'Passkey Logs', event_list, is_rewrite=False)
+            print('---Sucesso, foram registadas ' + str(len(event_list)) + ' operações Passkey---')
 
-if __name__ == "__main__":
-    # Replace 'path_to_evtx_file.evtx' with the actual path to your EVTX file
-    # evtx_file_path1 = r'event-logs\antes\Microsoft-Windows-WebAuthN%4Operational.evtx'
-    # evtx_file_path2 = r'event-logs\depois_depois\Microsoft-Windows-WebAuthN%4Operational.evtx'
-    evtx_file_path3 = r'event-logs\2024-04-03_00.00\Microsoft-Windows-WebAuthN%4Operational.evtx'
-    # evtx_file_path4 = r'event-logs\windows10\Microsoft-Windows-WebAuthN%4Operational.evtx'
-    if len(sys.argv) == 2:
-        read_evtx_file(sys.argv[1])
-    else:
-        # read_evtx_file(evtx_file_path1)
-        # read_evtx_file(evtx_file_path2)
-        read_evtx_file(evtx_file_path3)
-        # read_evtx_file(evtx_file_path4)
+
