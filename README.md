@@ -20,7 +20,7 @@ pip install -r requirements.txt
 ### CLI
 
 ```sh
-$ python main.py -p <path_to_search> -l <log_file> -r <registry_file> -f <csv | html | xlsx> -o <output_folder> -s <start_date_filter> -e <end_date_filter>
+python main.py -p <path_to_search> -l <log_file> -r <registry_file> -f <csv | html | xlsx> -o <output_folder> -s <start_date_filter> -e <end_date_filter>
 ```
 
 # PAF
@@ -45,5 +45,5 @@ pip install regipy
 ### CLI
 
 ```sh
-$ python passkey_antiforensics.py
+python passkey_antiforensics.py
 ```

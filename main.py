@@ -11,8 +11,6 @@ from utils import functions as own_functions
 
 REGISTRY_FILE = 'NTUSER.DAT'
 EVTX_FILE = 'Microsoft-Windows-WebAuthN%4Operational.evtx'
-SEARCH_FILES = ['*/Windows/System32/winevt/Logs/Microsoft-Windows-WebAuthN%4Operational.evtx', \
-                '*/Windows/ServiceProfiles/NetworkService/NTUSER.DAT']
 
 
 def main(data):
@@ -20,7 +18,6 @@ def main(data):
 
     startdate = data.startdate
     enddate = data.enddate
-    search_path = data.searchpath
     output_format = data.format
     output_folder = data.output
 
@@ -31,39 +28,32 @@ def main(data):
 
     out_params = OutputParameters(output_folder, output_format)
     logfunc()
-    input_path = 'N\A'  # TODO
+    input_path = ''
 
-  
 
     terminate = [False, False] # flag to terminate if no files are found
 
-    if search_path:
-        search_path = os.path.abspath(search_path)
-        exit()
-        file = own_functions.search_file(SEARCH_FILES[0], search_path, True)
-        print(file)
-        exit()
+    eventlog_file = data.eventlog
+    if eventlog_file:
+        eventlog_file = os.path.abspath(data.eventlog)
+        if os.path.isdir(eventlog_file):
+            eventlog_file = os.path.join(eventlog_file, EVTX_FILE)
+            if not os.path.exists(eventlog_file):
+                logfunc(f'ERROR: File {EVTX_FILE} not found.')
+                terminate[0] = True
+            else:
+                input_path += eventlog_file
 
-
-
-    else:
-        eventlog_file = data.eventlog
-        if eventlog_file:
-            eventlog_file = os.path.abspath(data.eventlog)
-            if os.path.isdir(eventlog_file):
-                eventlog_file = os.path.join(eventlog_file, EVTX_FILE)
-                if not os.path.exists(eventlog_file):
-                    logfunc(f'ERROR: File {EVTX_FILE} not found.')
-                    terminate[0] = True
-
-        registry_file = data.registry
-        if registry_file:
-            registry_file = os.path.abspath(data.registry)
-            if os.path.isdir(registry_file):
-                registry_file = os.path.join(registry_file, REGISTRY_FILE)
-                if not os.path.exists(registry_file):
-                    logfunc(f'ERROR: File {REGISTRY_FILE} not found.')
-                    terminate[1] = True
+    registry_file = data.registry
+    if registry_file:
+        registry_file = os.path.abspath(data.registry)
+        if os.path.isdir(registry_file):
+            registry_file = os.path.join(registry_file, REGISTRY_FILE)
+            if not os.path.exists(registry_file):
+                logfunc(f'ERROR: File {REGISTRY_FILE} not found.')
+                terminate[1] = True
+            else:
+                input_path += "; " + registry_file
         
     if all(terminate):
         logfunc(f'ERROR: No files to process, terminating.')
@@ -99,21 +89,12 @@ if __name__ == "__main__":
             Passkey Event Analyzer is a tool to extract and 
             analyze FIDO2 keys from Windows Event Logs and Registry''',
         epilog='Developed by: Pedro Chen and Bruno Correia')
-    
-    parser.add_argument(
-        "-p",
-        "--searchpath",
-        help="Path to search for event log and registry files",
-        required=False,
-        default=None,
-        type=str)
 
     parser.add_argument(
         "-l",
         "--eventlog",
         help="Event log file, or path with event log file",
         required=False,
-        default=None,
         type=str)
 
     parser.add_argument(
@@ -121,7 +102,6 @@ if __name__ == "__main__":
         "--registry",
         help="Registry file, or path with registry file",
         required=False,
-        default=None,
         type=str)
     
     parser.add_argument(
@@ -129,7 +109,6 @@ if __name__ == "__main__":
         "--startdate",
         help="Start date filter of the event log (ISOformat - YYYY-MM-DD:HH:mm:ss)",
         required=False,
-        default=None,
         type=datetime.datetime.fromisoformat
     )
 
@@ -138,7 +117,6 @@ if __name__ == "__main__":
         "--enddate",
         help="End date filter of the event log (ISOformat - YYYY-MM-DD:HH:mm:ss)",
         required=False,
-        default=None,
         type=datetime.datetime.fromisoformat
     )
 
@@ -147,7 +125,6 @@ if __name__ == "__main__":
         "--output",
         help="Output folder",
         required=False,
-        default=None,
         type=str)
 
     parser.add_argument(
@@ -155,7 +132,6 @@ if __name__ == "__main__":
         "--format",
         help="Output format",
         required=True,
-        default=None,
         type=str,
         choices=['csv', 'html', 'xlsx'])
 
@@ -163,17 +139,8 @@ if __name__ == "__main__":
 
     # argument validation
 
-    if args.searchpath is None and args.eventlog is None and args.registry is None:
-        parser.error("at least one of the following arguments must be provided: -s/--searchpath, -l/--eventlog, -r/--registry")
-
-    if args.searchpath is not None:
-        print("-s/--searchpath argument was provided, the arguments -l/--eventlog, -r/--registry will be ignored")
-
-        if not os.path.exists(args.searchpath): # check if the path exists
-            parser.error(f"the path {args.searchpath} does not exist")
-
-        if not os.path.isdir(args.searchpath): # check if the path is a directory
-            parser.error(f"the path {args.searchpath} does not a directory")
+    if args.eventlog is None and args.registry is None:
+        parser.error("at least one of the following arguments must be provided: -l/--eventlog, -r/--registry")
     
     if args.eventlog is not None:
         if not os.path.exists(args.eventlog):

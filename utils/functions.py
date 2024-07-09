@@ -57,26 +57,3 @@ def write_excel(file_name, sheet, data, is_rewrite=False):
 
             workbook.save(file_name)
 
-
-def search_file(filepattern, directory, return_on_first_hit=False):
-    if return_on_first_hit:
-        for item in list_files(directory):
-            if fnmatch.fnmatch(item, filepattern):
-                return [item]
-        return []
-    return fnmatch.filter(list_files(directory), filepattern)
-
-def list_files(directory):
-    all_files = []
-
-    try:
-        files_list = os.scandir(directory)
-        for item in files_list:
-            all_files.append(item.path)
-            if item.is_dir(follow_symlinks=False):
-                all_files.append(list_files(item.path))
-
-        return all_files
-    except Exception as ex:
-        logfunc(f'Error reading {directory} ' + str(ex))
-        return all_files
