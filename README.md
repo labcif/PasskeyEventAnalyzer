@@ -39,7 +39,7 @@ Python 3.11 to latest version (older versions of 3.x will also work)
 Install dependencies
 
 ```sh
-pip install regipy
+pip install psutil
 ```
 
 ### CLI

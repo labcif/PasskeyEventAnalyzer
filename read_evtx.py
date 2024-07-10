@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from Evtx.Evtx import Evtx
 from utils import functions as own_functions
 from scripts.artifact_report import ArtifactHtmlReport
-from scripts.ilapfuncs import logfunc, tsv
+from scripts.ilapfuncs import logfunc
 
 
 class PasskeyLog:
@@ -108,7 +108,7 @@ def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None
                     event.set_user_id(user_id)
 
                 event.set_event_type("Authentication" if event_id == "1003" else "Registration")
-                print('Operation detected: Type: ', event.type, ' Day: ',  event.timestamp)
+                logfunc(f'\tOperation detected: Type: {event.type} Day: {event.timestamp}')
             elif event and event_id in ["1001", "1004"]:
                 event.set_event_conclusion("Success")
                 event_list.append((event.userId, event.transactionId, event.type, event.browser, event.browserPath,
@@ -152,8 +152,7 @@ def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None
         if output_format == 'csv':
             event_list.insert(0, data_headers)
             own_functions.write_csv(os.path.join(report_folder, 'passkey_logs.csv'), event_list)
-            logfunc('---Sucess, ' + str(len(event_list)) + ' Passkey operations registered---')
-
+            logfunc('---Success, ' + str(len(event_list)) + ' Passkey operations registered---')
 
         elif output_format == 'html':
             if len(event_list) > 0:
@@ -163,18 +162,13 @@ def read_evtx_file(evtx_file_path, report_folder, output_format, start_date=None
 
                 report.write_artifact_data_table(data_headers, event_list, evtx_file_path)
                 report.end_artifact_report()
-
-                tsvname = f'Passkeys - Event Log'
-
-                report_folder = os.path.join(report_folder, "passkeys") + '\\'
-                tsv(report_folder, data_headers, event_list, tsvname)
-                logfunc('---Sucess, ' + str(len(event_list)) + ' Passkey operations ---')
+                logfunc('---Success, ' + str(len(event_list)) + ' Passkey operations ---')
             else:
                 logfunc('Passkeys - Event Log data available')
 
         elif output_format == 'xlsx':
             event_list.insert(0, data_headers)
             own_functions.write_excel(os.path.join(report_folder, 'passkeys_artifacts_data.xlsx'), 'Passkey Logs', event_list, is_rewrite=False)
-            logfunc('---Sucess, ' + str(len(event_list)) + ' Passkey operations ---')
+            logfunc('---Success, ' + str(len(event_list)) + ' Passkey operations ---')
 
 

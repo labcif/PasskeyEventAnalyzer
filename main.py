@@ -62,21 +62,21 @@ def main(data):
 
     # ======================= File Processing =======================
 
-    print('- ANALISADOR FORENSE PASSKEYS - ', strftime("%d/%m/%Y %H:%M:%S"))
+    logfunc(f'- PASSKEY EVENT ANALYSER - {strftime("%d/%m/%Y %H:%M:%S")}')
     if data.eventlog:
         read_evtx.read_evtx_file(eventlog_file, out_params.report_folder_base, output_format, startdate, enddate)
 
     if data.registry:
         read_registry.read_registry_file(registry_file, out_params.report_folder_base, output_format)
 
-    print('TERMINADO - para mais detalhes consulte os resultados na pasta de output.')
+    print('DONE - the output is in the folder:', out_params.report_folder_base)
     # ======================= Terminate Report =======================
 
     end = process_time()
     run_time_secs = end - start
     run_time_HMS = strftime('%H:%M:%S', gmtime(run_time_secs))
 
-    print(f'Tempo decorrido: {run_time_HMS}')
+    logfunc(f'Elapsed time : {run_time_HMS} ({run_time_secs:.4f} seconds)')
 
     if output_format == 'html':
         generate_report(out_params.report_folder_base, run_time_secs, run_time_HMS, input_path)

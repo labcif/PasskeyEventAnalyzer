@@ -66,6 +66,6 @@ if __name__ == "__main__":
     delete_evtx_file("Microsoft-Windows-WebAuthN%4Operational.evtx")
 
     print("A tentar eliminar entradas no registry")
-    delete_registry_key(winreg.HKEY_USERS, r"S-1-5-20\Software\Microsoft\Cryptography\FIDO")
+    delete_registry_key(winreg.HKEY_USERS, rf"S-1-5-20\Software\Microsoft\Cryptography\FIDO")
 
 

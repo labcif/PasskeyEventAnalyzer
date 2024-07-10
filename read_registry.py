@@ -1,7 +1,7 @@
 from regipy.registry import RegistryHive
 from regipy.utils import convert_wintime
 from scripts.artifact_report import ArtifactHtmlReport
-from scripts.ilapfuncs import logfunc, tsv
+from scripts.ilapfuncs import logfunc
 import os
 from utils import functions as own_functions
 
@@ -49,7 +49,7 @@ def read_registry_file(registry_file_path, report_folder, output_format):
                     # print("\t\t" + str(i))
                     if i.name == "Name":
                         linked_device[1] = i.value
-                        print('Device found: ', i.value)
+                        logfunc(f'\tDevice found: {i.value}')
                     if i.name == "Data" and i.value_type == 'REG_BINARY':
                         linked_device[4] = i.value.hex().upper()
                     linked_device[3] = i.is_corrupted
@@ -64,13 +64,11 @@ def read_registry_file(registry_file_path, report_folder, output_format):
     data_headers = ('User ID', 'Device Name', 'Last Modified','Is Corrupted', 'Device Data')
 
     if output_format == 'csv':
-        logfunc('---Sucess, ' + str(len(linked_device)) + ' associated devices found---')
         linked_devices.insert(0, data_headers)
         own_functions.write_csv(os.path.join(report_folder, 'linked_devices.csv'), linked_devices)
-
+        logfunc('---Sucess, ' + str(len(linked_devices)) + ' associated devices found---')
 
     elif output_format == 'html':
-        logfunc('---Sucess, ' + str(len(linked_device)) + ' associated devices found---')
         if len(linked_devices) > 0:
             report = ArtifactHtmlReport('Passkeys - Registry')
             report.start_artifact_report(report_folder, 'Passkeys - Registry')
@@ -79,16 +77,12 @@ def read_registry_file(registry_file_path, report_folder, output_format):
             report.write_artifact_data_table(data_headers, linked_devices, registry_file_path)
             report.end_artifact_report()
 
-            tsvname = f'Passkeys - Registry'
-
-            report_folder = os.path.join(report_folder, "passkeys") + '\\'
-            tsv(report_folder, data_headers, linked_devices, tsvname)
+            logfunc('---Sucess, ' + str(len(linked_devices)) + ' associated devices found---')
         else:
             logfunc('Passkeys - registry data available')
     
     elif output_format == 'xlsx':
-        logfunc('---Sucess, ' + str(len(linked_device)) + ' associated devices found---')
         linked_devices.insert(0, data_headers)
         own_functions.write_excel(os.path.join(report_folder, 'passkeys_artifacts_data.xlsx'), 'Linked Devices', linked_devices, is_rewrite=False)
-
+        logfunc('---Sucess, ' + str(len(linked_devices)) + ' associated devices found---')
 
