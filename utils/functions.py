@@ -4,7 +4,6 @@ import openpyxl
 import openpyxl.utils
 import openpyxl.utils.dataframe
 import os
-import fnmatch
 from scripts.ilapfuncs import *
 
 

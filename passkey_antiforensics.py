@@ -2,6 +2,8 @@ import winreg
 import os
 import psutil
 
+REGISTRY_PATH = fr"S-1-5-20\Software\Microsoft\Cryptography\FIDO"
+
 def find_process_using_file(file_path):
     for proc in psutil.process_iter(['pid', 'name', 'open_files']):
         try:
@@ -30,18 +32,18 @@ def delete_evtx_file(evtx_filename):
             # Find the process using the file
             proc = find_process_using_file(evtx_file_path)
             if proc:
-                print(f"Processo {proc.info['name']} (PID: {proc.info['pid']}) está a usar este ficheiro.")
-                print(f"A terminar o processo {proc.info['name']} (PID: {proc.info['pid']}) para eliminar o ficheiro.")
+                print(f"Process {proc.info['name']} (PID: {proc.info['pid']}) is using this file.")
+                print(f"Finishing process {proc.info['name']} (PID: {proc.info['pid']}) to delete the file.")
                 proc.terminate()
                 proc.wait()  # Wait for the process to terminate
 
             # Attempt to delete the file
             os.remove(evtx_file_path)
-            print(f"--Ficheiro EVTX eliminado com sucesso {evtx_file_path}--")
+            print(f"--EVTX file successfully deleted {evtx_file_path}--")
         else:
-            print(f"O ficheiro {evtx_file_path} não existe.")
+            print(f"The file {evtx_file_path} does not exist")
     except Exception as e:
-        print(f"Ocorreu um erro ao tentar eliminar o ficheiro: {e}")
+        print(f"An error occurred when trying to delete the file: {e}")
 
 
 def delete_registry_key(key, sub_key_name: str):
@@ -54,18 +56,18 @@ def delete_registry_key(key, sub_key_name: str):
                 except OSError:
                     break
         winreg.DeleteKey(key, sub_key_name)
-        print("--Os dispositivos associados foram eliminados com sucesso--")
+        print("--Associated devices have been deleted successfully--")
     except:
-        print(f"A Chave {key}\\{sub_key_name} não existe ou não foi encontrada")
+        print(f"A Key {key}\\{sub_key_name} does not exist")
 
 
 # Example usage
 if __name__ == "__main__":
-    print("--- Passkey Anti Forense ---")
-    print("A tentar eliminar ficheiro EVTX")
+    print("--- Passkey Anti-Forensics ---")
+    print("Trying to delete EVTX file")
     delete_evtx_file("Microsoft-Windows-WebAuthN%4Operational.evtx")
 
-    print("A tentar eliminar entradas no registry")
-    delete_registry_key(winreg.HKEY_USERS, rf"S-1-5-20\Software\Microsoft\Cryptography\FIDO")
+    print("Trying to delete registry entries")
+    delete_registry_key(winreg.HKEY_USERS, REGISTRY_PATH)
 
 
