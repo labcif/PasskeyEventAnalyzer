@@ -23,6 +23,7 @@ def delete_evtx_file(evtx_filename):
 
     :param evtx_filename: The name of the EVTX file to delete.
     """
+
     # Construct the full path to the EVTX file
     evtx_file_path = os.path.join(os.environ['WINDIR'], "\\Windows\\System32\\winevt\\Logs", evtx_filename)
 
@@ -39,11 +40,13 @@ def delete_evtx_file(evtx_filename):
 
             # Attempt to delete the file
             os.remove(evtx_file_path)
-            print(f"--EVTX file successfully deleted {evtx_file_path}--")
+            print(f"-EVTX file successfully deleted {evtx_file_path}")
         else:
-            print(f"The file {evtx_file_path} does not exist")
+            print(f"-The file {evtx_file_path} does not exist")
+        return True
     except Exception as e:
-        print(f"An error occurred when trying to delete the file: {e}")
+        print(f"-An error occurred when trying to delete the file: {e}")
+        return False
 
 
 def delete_registry_key(key, sub_key_name: str):
@@ -56,18 +59,28 @@ def delete_registry_key(key, sub_key_name: str):
                 except OSError:
                     break
         winreg.DeleteKey(key, sub_key_name)
-        print("--Associated devices have been deleted successfully--")
+        print("Device found and deleted")
+        return True
     except:
-        print(f"A Key {key}\\{sub_key_name} does not exist")
+        print(f"-A Key {key}\\{sub_key_name} does not exist")
+        return False
 
-
-# Example usage
 if __name__ == "__main__":
+    is_sucess = True
     print("--- Passkey Anti-Forensics ---")
+    print("--------------------------------------------------")
     print("Trying to delete EVTX file")
-    delete_evtx_file("Microsoft-Windows-WebAuthN%4Operational.evtx")
+    is_sucess = delete_evtx_file("Microsoft-Windows-WebAuthN%4Operational.evtx")
+    
 
     print("Trying to delete registry entries")
-    delete_registry_key(winreg.HKEY_USERS, REGISTRY_PATH)
-
+    if delete_registry_key(winreg.HKEY_USERS, REGISTRY_PATH):
+        print("--All associated devices were deleted--")
+        
+    print("--------------------------------------------------")
+    print("Passkey Anti-Forensics has completed")
+    if is_sucess:
+        print("-Your device is free of Passkey Artifacts-")
+    else:
+        print("-Your device still might have traces of Passkey Artifacts-")
 
