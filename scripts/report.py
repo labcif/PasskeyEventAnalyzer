@@ -8,7 +8,17 @@ from collections import OrderedDict
 from scripts.html_parts import *
 from scripts.ilapfuncs import logfunc
 from scripts.version_info import pea_version, pea_contributors
+from scripts.pea_config import C_SCRIPT_LOGS_DIRNAME, C_SCREEN_OUTPUT_HTML_FNAME
 
+
+#================================================
+# Adaptaded from WLEAPP
+# https://github.com/abrignoni/wleapp
+#================================================
+
+#================================================
+# Code
+#================================================
 def get_icon_name(category, artifact):
     ''' Returns the icon name from the feathericons collection. To add an icon type for 
         an artifact, select one of the types from ones listed @ feathericons.com
@@ -190,7 +200,8 @@ def create_index_html(reportfolderbase, time_in_secs, time_HMS, image_input_path
     """
     
     # Get script run log (this will be tab2)
-    script_log_path = os.path.join(reportfolderbase, 'Script Logs', 'Screen Output.html')
+    script_log_path = os.path.join(reportfolderbase, 
+                            C_SCRIPT_LOGS_DIRNAME, C_SCREEN_OUTPUT_HTML_FNAME)
     tab2_content = get_file_content(script_log_path)
     
     content += tabs_code.format(tab1_content, tab2_content)
@@ -290,3 +301,4 @@ def mark_item_active(data, itemname):
         return ret
     
     
+
