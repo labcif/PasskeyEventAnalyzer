@@ -138,3 +138,4 @@ class ArtifactHtmlReport:
             self.report_file = None
 
         
+

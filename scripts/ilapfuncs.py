@@ -9,6 +9,8 @@ import shutil
 from pathlib import Path
 
 from bs4 import BeautifulSoup
+from scripts.pea_config import C_SCRIPT_LOGS_DIRNAME, C_SCREEN_OUTPUT_HTML_FNAME
+
 
 class OutputParameters:
     '''Defines the parameters that are common for '''
@@ -20,9 +22,12 @@ class OutputParameters:
         now = datetime.datetime.now()
         currenttime = str(now.strftime('%Y-%m-%d_%A_%H%M%S'))
         self.report_folder_base = os.path.join(output_folder, 'Passkeys_Reports_' + currenttime) # aleapp , aleappGUI, ileap_artifacts, report.py
-        os.makedirs(os.path.join(self.report_folder_base, 'Script Logs'))
+        # os.makedirs(os.path.join(self.report_folder_base, 'Script Logs'))
+        os.makedirs(os.path.join(self.report_folder_base, C_SCRIPT_LOGS_DIRNAME))
         
-        OutputParameters.screen_output_file_path = os.path.join(self.report_folder_base, 'Script Logs', 'Screen Output.html')
+#        OutputParameters.screen_output_file_path = os.path.join(self.report_folder_base, 'Script Logs', 'Screen Output.html')
+        OutputParameters.screen_output_file_path = os.path.join(self.report_folder_base, 
+                                                                C_SCRIPT_LOGS_DIRNAME, C_SCREEN_OUTPUT_HTML_FNAME)
 
             
 
